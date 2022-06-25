@@ -7,15 +7,15 @@
 
 import Foundation
 
-extension ParticleSystem {
+public extension ParticleSystem {
     struct Particle: Hashable {
         //identity
         let id = UUID()
         
         //initial conditions upon entering system
         let creationDate = Date.now.timeIntervalSinceReferenceDate
-        let startX: Double
-        let startY: Double
+        public let startX: Double
+        public let startY: Double
         let start_vi:Double
         let start_vj:Double
         
@@ -23,15 +23,15 @@ extension ParticleSystem {
         let mass: Double
         let radius: Double
         
-        var age:Double {
+        public var age:Double {
             Date.now.timeIntervalSinceReferenceDate - creationDate
         }
         
-        static func ==(lhs: Particle, rhs: Particle) -> Bool {
+        public static func ==(lhs: Particle, rhs: Particle) -> Bool {
             return lhs.id == rhs.id
         }
         
-        func hash(into hasher: inout Hasher) {
+        public func hash(into hasher: inout Hasher) {
             hasher.combine(id)
         }
     }

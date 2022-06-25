@@ -9,9 +9,9 @@ import Foundation
 import SwiftUI
 
 public extension ParticleSystem {
-     class ParticleManager {
+     final class ParticleManager {
         //Particle Storage
-        private var particles = Set<Particle>()
+        public private(set) var particles = Set<Particle>()
         
         //System Features
         private let maxCount = 1000
@@ -33,10 +33,12 @@ public extension ParticleSystem {
         public private(set) var angleWobble = 0.2
         public private(set) var magnitudeRange = 0.01...0.3
         public private(set) var magnitudeWobble = 0.05
+         
+        public init() {}
         
         
         //TODO: Particle add should stay here, but values should be udated by a data subscription?
-        func update(date:Date, direction:Double, magnitude:Double, origin:(Double, Double)) {
+        public func update(date:Date, direction:Double, magnitude:Double, origin:(Double, Double)) {
             
             self.origin = origin
             //print("origin - \(self.origin.x), \(self.origin.y)")
@@ -66,7 +68,7 @@ public extension ParticleSystem {
             particles.remove(particle)
         }
         
-        func particleLocation(for particle:Particle, when timeInterval:Double) -> (x:Double, y:Double)? {
+        public func particleLocation(for particle:Particle, when timeInterval:Double) -> (x:Double, y:Double)? {
             let interval = timeInterval - particle.creationDate
             let x = particle.startX + (particle.start_vi * interval)
             let y = particle.startY + (particle.start_vj * interval)

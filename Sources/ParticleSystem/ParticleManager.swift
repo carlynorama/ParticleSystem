@@ -8,52 +8,99 @@
 import Foundation
 import SwiftUI
 
+
+    
 public extension ParticleSystem {
-     final class ParticleManager {
+        struct Profile:Codable {
+            
+            //Spawning
+            public var birthRate = 1.0
+            
+            //how much chaos
+            public var angleRange:ClosedRange<Double>
+            public var angleWobble:Double
+            public var magnitudeRange:ClosedRange<Double>
+            public var magnitudeWobble:Double
+        }
+    }
+
+    fileprivate extension ParticleSystem.Profile {
+        init() {
+            birthRate = 1.0
+            angleRange = 0...(2.0 * Double.pi)
+            angleWobble = 0.2
+            magnitudeRange = 0.01...0.3
+            magnitudeWobble = 0.05
+        }
+    }
+
+public extension ParticleSystem {
+    
+    final class ParticleManager {
         //Particle Storage
         public private(set) var particles = Set<Particle>()
+        public private(set) var profile = Profile()
         
         //System Features
         private let maxCount = 1000
-        //TODO: Which is more "perfomant?"
+        //TODO: This should be determined by what/who exactly?
         private let visiblebounds = -1.25...1.25
         
         //Sub-Timing
-        private var birthRate = 1.0
-        private var updateTime = Date.timeIntervalSinceReferenceDate
+        
+        
         
         //Particle Representation
-        public let image = Image(systemName: "sparkle")
+        public let particleRepresentation = Image(systemName: "sparkle")
         public private(set) var massRange = 0.01...1.0
         public private(set) var radiusRange = 0.01...1.0
         
-        //Emission Ranges -- Updateable
+        //Spawning
+        //private var birthRate = 1.0
         public private(set) var origin = (x:0.0, y:0.0)
-        public private(set) var angleRange = 0...(2.0 * Double.pi)
-        public private(set) var angleWobble = 0.2
-        public private(set) var magnitudeRange = 0.01...0.3
-        public private(set) var magnitudeWobble = 0.05
-         
+        
+        //Emission Ranges -- Updateable
+        //        public private(set) var angleRange = 0...(2.0 * Double.pi)
+        //        public private(set) var angleWobble = 0.2
+        //        public private(set) var magnitudeRange = 0.01...0.3
+        //        public private(set) var magnitudeWobble = 0.05
+        
         public init() {}
+        
+        private var updateTime = Date.timeIntervalSinceReferenceDate
         
         
         //TODO: Particle add should stay here, but values should be udated by a data subscription?
         public func update(date:Date, direction:Double, magnitude:Double, origin:(Double, Double)) {
             
-            self.origin = origin
-            //print("origin - \(self.origin.x), \(self.origin.y)")
-            angleRange = (direction - angleWobble)...(direction + angleWobble)
-            magnitudeRange = max((magnitude - magnitudeWobble), 0.01)...(magnitude + magnitudeWobble)
-            
+            updateOrigin(origin)
+            updateStartingVelocity(direction: direction, magnitude: magnitude)
             
             if particles.count < maxCount && checkTimer(currentTime: date.timeIntervalSinceReferenceDate) {
                 addParticle()
             }
         }
         
+        public func updateStartingVelocity(direction:Double, magnitude:Double) {
+            profile.angleRange = (direction - profile.angleWobble)...(direction + profile.angleWobble)
+            profile.magnitudeRange = max((magnitude - profile.magnitudeWobble), 0.01)...(magnitude + profile.magnitudeWobble) //always a little
+            
+        }
+         
+         public func updateOrigin(_ newCoords:(Double, Double)){
+             self.origin = newCoords
+             //print("origin - \(self.origin.x), \(self.origin.y)")
+         }
+         
+         public func updateOrigin(_ x:Double, _ y:Double) {
+             self.origin = (x,y)
+             //print("origin - \(self.origin.x), \(self.origin.y)")
+         }
+        
+        //TODO: Replace with clock??? 
         private func checkTimer(currentTime: Double) -> Bool {
             if currentTime > updateTime {
-                updateTime = currentTime + birthRate
+                updateTime = currentTime + profile.birthRate
                 return true
             } else {
                 return false
@@ -70,12 +117,15 @@ public extension ParticleSystem {
         
         public func particleLocation(for particle:Particle, when timeInterval:Double) -> (x:Double, y:Double)? {
             let interval = timeInterval - particle.creationDate
-            let x = particle.startX + (particle.start_vi * interval)
-            let y = particle.startY + (particle.start_vj * interval)
             
-            if visiblebounds.contains(x) && visiblebounds.contains(y) {
+            let distanceToTravel = particle.startVelocity * interval
+            let position = particle.startPosistion + distanceToTravel
+            
+            //TODO: Rewrite using simd? Don't like that his is done in here at all actually
+            //At somepoint there should be a particle store cleaner? Asyc on an actor style?
+            if visiblebounds.contains(position.x) && visiblebounds.contains(position.y) {
                 //if bounds.contains(CGPoint(x: x, y: y)) {
-                return (x:x, y:y)
+                return (x:position.x, y:position.y)
             } else {
                 remove(particle)
                 print("particle count: \(particles.count)")
@@ -92,10 +142,8 @@ public extension ParticleSystem {
             let i = cos(direction) * magnitude
             //print("direction: \(direction) i: \(i) j: \(j)")
             return Particle (
-                startX: x,
-                startY: y,
-                start_vi: i,
-                start_vj: j,
+                startPosistion: Pair(x,y),
+                startVelocity: Pair(i,j),
                 mass: Double.random(in: massRange),
                 radius: Double.random(in: radiusRange)
             )
@@ -103,8 +151,8 @@ public extension ParticleSystem {
         
         //can't use variable as a default
         func createParticle() -> Particle {
-            let direction = Double.random(in: angleRange)//Angle(degrees: 30).radians//1.0 * Double.pi //
-            let maginitude = Double.random(in: magnitudeRange)
+            let direction = Double.random(in: profile.angleRange)//Angle(degrees: 30).radians//1.0 * Double.pi //
+            let maginitude = Double.random(in: profile.magnitudeRange)
             return createParticle(x: origin.x, y: origin.y, direction: direction, magnitude: maginitude)
         }
     }

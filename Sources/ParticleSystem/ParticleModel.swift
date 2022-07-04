@@ -14,10 +14,8 @@ public extension ParticleSystem {
         
         //initial conditions upon entering system
         let creationDate = Date.now.timeIntervalSinceReferenceDate
-        public let startX: Double
-        public let startY: Double
-        let start_vi:Double
-        let start_vj:Double
+        public let startPosistion:Pair
+        public let startVelocity:Pair
         
         //physical properties
         let mass: Double

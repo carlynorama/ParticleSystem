@@ -14,7 +14,7 @@ public extension ParticleSystem {
         struct Profile:Codable {
             
             //Spawning
-            public var birthRate = 1.0
+            public var timeBetweenSpawnsInSeconds = 1.0
             
             //how much chaos
             public var angleRange:ClosedRange<Double>
@@ -26,7 +26,7 @@ public extension ParticleSystem {
 
     fileprivate extension ParticleSystem.Profile {
         init() {
-            birthRate = 1.0
+            timeBetweenSpawnsInSeconds = 1.0
             angleRange = 0...(2.0 * Double.pi)
             angleWobble = 0.2
             magnitudeRange = 0.01...0.3
@@ -39,7 +39,7 @@ public extension ParticleSystem {
     final class ParticleManager {
         //Particle Storage
         public private(set) var particles = Set<Particle>()
-        public private(set) var profile = Profile()
+        public var profile = Profile()
         
         //System Features
         private let maxCount = 1000
@@ -86,6 +86,10 @@ public extension ParticleSystem {
             profile.magnitudeRange = max((magnitude - profile.magnitudeWobble), 0.01)...(magnitude + profile.magnitudeWobble) //always a little
             
         }
+        
+        public var birthRatePerSecond:Double {
+                1/(profile.timeBetweenSpawnsInSeconds)
+        }
          
          public func updateOrigin(_ newCoords:(Double, Double)){
              self.origin = newCoords
@@ -100,7 +104,7 @@ public extension ParticleSystem {
         //TODO: Replace with clock??? 
         private func checkTimer(currentTime: Double) -> Bool {
             if currentTime > updateTime {
-                updateTime = currentTime + profile.birthRate
+                updateTime = currentTime + profile.timeBetweenSpawnsInSeconds
                 return true
             } else {
                 return false

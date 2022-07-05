@@ -26,8 +26,10 @@ public struct PSVector {
     //typealias ValidInputType = Real
     public typealias Basic = Float
     public typealias Triplet = SIMD3<Basic>
-    public typealias PSVPair = SIMD2<Basic> //TODO: can't just call pair because using taht type alias already in package
+    public typealias Pair = SIMD2<Basic> //TODO: can't just call pair because using taht type alias already in package
     //TODO: as function of Basic??
+    //Doesnot look like there is a way to decalre a 3x3 as a type.
+    //There is simd_double3x3, maybe just punt everything to that
     public typealias Matrix3x3 = simd_float3x3
     static public let identityMatrix3x3 =  matrix_identity_float3x3 as Matrix3x3
 
@@ -39,8 +41,8 @@ public struct PSVector {
     let transformationVector:Triplet  //(x: 3, y: 2, z: 1)
     
     //How much does this slow the math down?
-    var vectorPair:PSVPair {
-        PSVPair(transformationVector.x, transformationVector.y)
+    var vectorPair:Pair {
+        Pair(transformationVector.x, transformationVector.y)
     }
     
     var polarValue:(direction:Basic, magnitude:Basic) {
@@ -77,9 +79,9 @@ extension PSVector {
     }
     
     static func toPolar(x:Basic, y:Basic) -> (direction:Basic, magnitude:Basic) {
-         let normalized = (simd_normalize(PSVPair(x,y)))
+         let normalized = (simd_normalize(Pair(x,y)))
          let direction = atan2(normalized.x, normalized.y)
-         let magnitude = simd_length(PSVPair(x,y))
+         let magnitude = simd_length(Pair(x,y))
          return (direction:direction, magnitude:magnitude)
     }
     
@@ -98,16 +100,16 @@ extension PSVector {
     }
     
     //should have same result as sqrt((ax-bx)^2 + (ay-by)^2))
-    func distance(from a:PSVPair, to b:PSVPair) -> Basic {
+    func distance(from a:Pair, to b:Pair) -> Basic {
         simd_distance(a, b)
     }
     
-    public func distance(to b:PSVPair) -> Basic {
+    public func distance(to b:Pair) -> Basic {
         distance(from: vectorPair, to: b)
     }
     
     //comapres the relative magnintudes of the distances
-    func closestPoint(a:PSVPair, b:PSVPair) -> PSVPair {
+    func closestPoint(a:Pair, b:Pair) -> Pair {
         if simd_distance_squared(a, vectorPair) < simd_distance_squared(b, vectorPair) {
             return a
         } else {
@@ -116,7 +118,7 @@ extension PSVector {
     }
     
     //MARK: Angles
-    var normalized:PSVPair {
+    var normalized:Pair {
         simd_normalize(vectorPair)
     }
     

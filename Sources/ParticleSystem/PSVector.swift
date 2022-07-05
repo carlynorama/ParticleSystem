@@ -67,9 +67,7 @@ public struct PSVector {
 
 extension PSVector {
     init(_ x:Double, _ y:Double) {
-        let castX = Basic(x)
-        let castY = Basic(y)
-        self.transformationVector = Triplet(x:castX, y:castY, z:1)
+        self.transformationVector = Triplet(x:Basic(x), y:Basic(y), z:1)
     }
     
     static func fromPolar(direction:Basic, magnitude:Basic) -> Triplet {
@@ -87,6 +85,10 @@ extension PSVector {
     
     init(direction:Basic, magnitude:Basic) {
         self.transformationVector = Self.fromPolar(direction: direction, magnitude: magnitude)
+    }
+    
+    init(direction:Double, magnitude:Double) {
+        self.transformationVector = Self.fromPolar(direction: Basic(direction), magnitude: Basic(magnitude))
     }
 }
 

@@ -52,8 +52,12 @@ public extension ParticleSystem {
         
         //Particle Representation
         public let particleRepresentation = Image(systemName: "sparkle")
-        public private(set) var massRange = 0.01...1.0
-        public private(set) var radiusRange = 0.01...1.0
+        
+        // density of water at 4°C is 1000.0    kg/m3 or 1.0      g/ml
+        // density of air at   5°C is    1.2690 kg/m3 or 0.001269 g/ml
+        // density of air at  20°C is    1.2041 kg/m3 or 0.001204 g/ml
+        public private(set) var massScalarRange = 0.01...1.0
+        public private(set) var radiusScalarRange = 0.01...1.0
         
         //Spawning
         //private var birthRate = 1.0
@@ -147,16 +151,13 @@ public extension ParticleSystem {
         
         
         func createParticle(x:Double, y:Double, direction:Double, magnitude:Double) -> Particle {
-            let j = sin(direction) * magnitude
-            let i = cos(direction) * magnitude
-            //print("direction: \(direction) i: \(i) j: \(j)")
-            return Particle (
+            Particle (
                 startPosistion: PSVector(x,y),
-                startVelocity: PSVector(i,j),
+                startVelocity: PSVector(direction: direction, magnitude: magnitude),
                 startAngle: PSVector(direction: Float.random(in: (0...Float.pi)), magnitude: 1.0),
                 startAngularVelocity: 0,
-                mass: Double.random(in: massRange),
-                radius: Double.random(in: radiusRange)
+                mass: Double.random(in: massScalarRange),
+                radius: Double.random(in: radiusScalarRange)
             )
         }
         

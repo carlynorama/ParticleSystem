@@ -30,6 +30,10 @@ public extension ParticleSystem {
             Date.now.timeIntervalSinceReferenceDate - creationDate
         }
         
+        public var density:Double {
+            mass/radius
+        }
+        
         public static func ==(lhs: Particle, rhs: Particle) -> Bool {
             return lhs.id == rhs.id
         }

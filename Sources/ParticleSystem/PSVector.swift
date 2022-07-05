@@ -5,22 +5,22 @@
 ////  Created by Labtanza on 6/22/22.
 ////
 //
-//import Foundation
+import Foundation
+import SwiftUI //For Vector Arithmatic Complaince if I want it in the future
+
+//TODO: Use Accelrate instead???
+//see https://swiftwithmajid.com/2020/06/17/the-magic-of-animatable-values-in-swiftui/
 //import Accelerate
 import simd
-import Numerics
-//import SwiftUI
-//
-////TODO: Should I just be using CGVector? Make my own vector type?
-////TODO:  The simd framework provides support for small vectors, that is, vectors that contain up to eight double-precision or sixteen single-precision values.
+
+//wanted so can be wonton in terms of input types of public functions? but not yet done.
+//import Numerics,
+
+
 ////https://developer.apple.com/documentation/accelerate/working_with_vectors
 ///https://developer.apple.com/documentation/accelerate/working_with_matrices
 ////https://developer.apple.com/documentation/vision/vnvector
-////CGVector?
-//
-////MARK: Retrieve Vectors
-////cant do Numeric or FloatingPoint easily b/c many numerics don't have trig
-//
+
 
 public struct PSVector {
     //typealias ValidInputType = Real
@@ -38,7 +38,7 @@ public struct PSVector {
     //transform points using matrix multiplication. Typically,
     //the third component of the vector, z, is set to 1, which //
     //indicates that the vector represents a position in space.
-    let transformationVector:Triplet  //(x: 3, y: 2, z: 1)
+    private var transformationVector:Triplet  //(x: 3, y: 2, z: 1)
     
     //How much does this slow the math down?
     var vectorPair:Pair {
@@ -261,8 +261,21 @@ extension PSVector {
 //
 //}
 //
-extension PSVector {
-    static func + (lhs:PSVector, rhs:PSVector) -> PSVector {
+extension PSVector:VectorArithmetic {
+    public static var zero:PSVector {
+        return Self(transformationVector: Triplet(0,0,0))
+    }
+    
+    public mutating func scale(by rhs: Double) {
+        self.transformationVector = self.scaled(by: Basic(rhs))
+    }
+
+    public var magnitudeSquared: Double {
+        //square everyone and sum
+        Double((self.transformationVector * self.transformationVector).sum())
+    }
+    
+    public static func + (lhs:PSVector, rhs:PSVector) -> PSVector {
 //        let x = lhs.i + rhs.i
 //        let y = lhs.j + rhs.j
         let new = lhs.transformationVector + rhs.transformationVector
@@ -278,7 +291,7 @@ extension PSVector {
        return lhs * Basic(rhs)
     }
     
-    static func - (lhs:PSVector, rhs:PSVector) -> PSVector {
+    public static func - (lhs:PSVector, rhs:PSVector) -> PSVector {
         //let x = lhs.i - rhs.i
         //let y = lhs.j - rhs.j
         let new = lhs.transformationVector - rhs.transformationVector
@@ -291,11 +304,11 @@ extension PSVector {
         return Self(transformationVector: new)
     }
     
-    static func += (lhs: inout PSVector, rhs: PSVector) {
+    public static func += (lhs: inout PSVector, rhs: PSVector) {
         lhs = lhs + rhs
     }
     
-    static func == (lhs: PSVector, rhs: PSVector) -> Bool {
+    public static func == (lhs: PSVector, rhs: PSVector) -> Bool {
         return (lhs.transformationVector == rhs.transformationVector)
     }
     

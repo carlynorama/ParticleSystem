@@ -17,6 +17,11 @@ public extension ParticleSystem {
         public let startPosistion:PSVector
         public let startVelocity:PSVector
         
+        public let startAngle:PSVector
+        public let startAngularVelocity:Double
+        public let rotationPoint = PSVector(0,0)
+        
+        
         //physical properties
         let mass: Double
         let radius: Double

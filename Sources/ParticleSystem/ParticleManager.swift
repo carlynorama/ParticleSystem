@@ -135,7 +135,12 @@ public extension ParticleSystem {
                 print("particle count: \(particles.count)")
                 return nil
             }
-            
+        }
+        
+        public func particleRotation(for particle:Particle, when timeInterval:Double) -> Angle {
+            let interval = timeInterval - particle.creationDate
+            let angle = particle.startAngle.asAngle + Angle.degrees(interval.remainder(dividingBy: 4)*90)
+            return angle
             
         }
         
@@ -148,6 +153,8 @@ public extension ParticleSystem {
             return Particle (
                 startPosistion: PSVector(x,y),
                 startVelocity: PSVector(i,j),
+                startAngle: PSVector(direction: Float.random(in: (0...Float.pi)), magnitude: 1.0),
+                startAngularVelocity: 0,
                 mass: Double.random(in: massRange),
                 radius: Double.random(in: radiusRange)
             )

@@ -126,6 +126,14 @@ extension PSVector {
         atan2(normalized.x, normalized.y)
     }
     
+    public var radians:Double {
+        Double(angle)
+    }
+    
+    public var asAngle:Angle {
+        Angle(radians: radians)
+    }
+    
     //MARK: Multiball Transfomations
     
     func transformed(dx tx:Basic, dy ty:Basic, radians:Basic, xscale:Basic, yscale:Basic) -> Triplet{

@@ -146,8 +146,8 @@ public extension ParticleSystem {
             let i = cos(direction) * magnitude
             //print("direction: \(direction) i: \(i) j: \(j)")
             return Particle (
-                startPosistion: Pair(x,y),
-                startVelocity: Pair(i,j),
+                startPosistion: PSVector(x,y),
+                startVelocity: PSVector(i,j),
                 mass: Double.random(in: massRange),
                 radius: Double.random(in: radiusRange)
             )

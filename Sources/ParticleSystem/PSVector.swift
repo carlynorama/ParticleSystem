@@ -188,6 +188,10 @@ extension PSVector {
     
     //MARK: Rotation
     
+    public func rotated(radians:Double) -> PSVector {
+        PSVector(transformationVector: rotated(radians: Basic(radians)))
+    }
+    
     func makeRotationMatrix(radians:Basic) -> Matrix3x3 {
         let rows = [
             simd_float3(cos(radians), -sin(radians), 0),
@@ -229,6 +233,8 @@ extension PSVector {
     func scaled(by scale:Basic) -> Triplet{
         scaled(xScale: scale, yScale: scale)
     }
+    
+    
     
 }
 
@@ -323,6 +329,10 @@ extension PSVector:VectorArithmetic {
     }
     
 }
-//
-//
-//
+
+extension PSVector {
+    static var randomNormalized:PSVector {
+        let random = Double.random(in:0...Double.pi*2)
+        return PSVector(direction: random, magnitude: 1)
+    }
+}

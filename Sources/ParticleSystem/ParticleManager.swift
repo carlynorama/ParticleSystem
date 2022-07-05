@@ -21,6 +21,7 @@ public extension ParticleSystem {
             public var angleWobble:Double
             public var magnitudeRange:ClosedRange<Double>
             public var magnitudeWobble:Double
+            public var angularVelocityRange:ClosedRange<Double>
         }
     }
 
@@ -31,6 +32,7 @@ public extension ParticleSystem {
             angleWobble = 0.2
             magnitudeRange = 0.01...0.3
             magnitudeWobble = 0.05
+            angularVelocityRange = 0.01...0.3
         }
     }
 
@@ -106,7 +108,7 @@ public extension ParticleSystem {
          }
         
         //TODO: Replace with clock??? 
-        private func checkTimer(currentTime: Double) -> Bool {
+        private func checkTimer(currentTime:Double) -> Bool {
             if currentTime > updateTime {
                 updateTime = currentTime + profile.timeBetweenSpawnsInSeconds
                 return true
@@ -143,7 +145,13 @@ public extension ParticleSystem {
         
         public func particleRotation(for particle:Particle, when timeInterval:Double) -> Angle {
             let interval = timeInterval - particle.creationDate
-            let angle = particle.startAngle.asAngle + Angle.degrees(interval.remainder(dividingBy: 4)*90)
+            //Shimmy
+            //let rotation = sin(interval)
+            //let angle = particle.startRotation.rotated(radians: rotation).asAngle
+            
+            let deltaTheta = particle.startAngularVelocity.radians * interval
+            let angle = particle.startRotation.rotated(radians: deltaTheta).asAngle
+            
             return angle
             
         }
@@ -154,8 +162,8 @@ public extension ParticleSystem {
             Particle (
                 startPosistion: PSVector(x,y),
                 startVelocity: PSVector(direction: direction, magnitude: magnitude),
-                startAngle: PSVector(direction: Float.random(in: (0...Float.pi)), magnitude: 1.0),
-                startAngularVelocity: 0,
+                startRotation: PSVector.randomNormalized,
+                startAngularVelocity: PSVector.randomNormalized,
                 mass: Double.random(in: massScalarRange),
                 radius: Double.random(in: radiusScalarRange)
             )

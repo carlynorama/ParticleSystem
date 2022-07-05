@@ -17,8 +17,8 @@ public extension ParticleSystem {
         public let startPosistion:PSVector
         public let startVelocity:PSVector
         
-        public let startAngle:PSVector
-        public let startAngularVelocity:Double
+        public let startRotation:PSVector
+        public let startAngularVelocity:PSVector  //radians per second
         public let rotationPoint = PSVector(0,0)
         
         

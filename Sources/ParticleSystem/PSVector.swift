@@ -17,7 +17,6 @@ import simd
 
 ////https://developer.apple.com/documentation/accelerate/working_with_vectors
 ///https://developer.apple.com/documentation/accelerate/working_with_matrices
-////https://developer.apple.com/documentation/vision/vnvector
 
 
 public struct PSVector {
@@ -282,26 +281,30 @@ extension PSVector:Animatable {
     public mutating func scale(by rhs: Double) {
         self.vectorTriplet = self.scaled(by: Basic(rhs))
     }
-
+        
+    //square and sum
     public var magnitudeSquared: Double {
-        //square everyone and sum
         Double((self.vectorTriplet * self.vectorTriplet).sum())
     }
     
+    //MARK: Additon & Subtraction
+    
+    //Should produce same result as
+    //        let x = lhs.x + rhs.x
+    //        let y = lhs.y + rhs.y
+    // TODO: confirm Z behavior.
     public static func + (lhs:PSVector, rhs:PSVector) -> PSVector {
-//        let x = lhs.i + rhs.i
-//        let y = lhs.j + rhs.j
         let new = lhs.vectorTriplet + rhs.vectorTriplet
         return Self(vectorTriplet: new)
     }
     
-    static func * (lhs:PSVector, rhs:Basic) -> PSVector {
-        let new = lhs.vectorTriplet * rhs
+    static func + (lhs:PSVector, rhs:Basic) -> PSVector {
+        let new = lhs.vectorTriplet + rhs
         return Self(vectorTriplet: new)
     }
     
-    static func * (lhs:PSVector, rhs:Double) -> PSVector {
-       return lhs * Basic(rhs)
+    static func + (lhs:PSVector, rhs:Double) -> PSVector {
+       return lhs + Basic(rhs)
     }
     
     public static func - (lhs:PSVector, rhs:PSVector) -> PSVector {
@@ -321,9 +324,32 @@ extension PSVector:Animatable {
         lhs = lhs + rhs
     }
     
+    public static func -= (lhs: inout PSVector, rhs: PSVector) {
+        lhs = lhs - rhs
+    }
+    
+    //MARK: Multiplication
+    
+    static func * (lhs:PSVector, rhs:Basic) -> PSVector {
+        let new = lhs.vectorTriplet * rhs
+        return Self(vectorTriplet: new)
+    }
+    
+    static func * (lhs:PSVector, rhs:Double) -> PSVector {
+       return lhs * Basic(rhs)
+    }
+    
+    //MARK: Equatable, Comparable
+    
     public static func == (lhs: PSVector, rhs: PSVector) -> Bool {
         return (lhs.vectorTriplet == rhs.vectorTriplet)
     }
+    
+    public static func > (lhs: PSVector, rhs: PSVector) -> Bool {
+        return (lhs.magnitudeSquared > rhs.magnitudeSquared)
+    }
+    
+    
     
 }
 

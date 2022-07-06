@@ -70,12 +70,12 @@ extension PSVector {
     static func fromPolar(direction:Basic, magnitude:Basic) -> Triplet {
             let x = cos(direction) * magnitude
             let y = sin(direction) * magnitude
-        return Triplet(x:y, y:x, z:1)
+        return Triplet(x:x, y:y, z:1)
     }
     
     static func toPolar(x:Basic, y:Basic) -> (direction:Basic, magnitude:Basic) {
          let normalized = (simd_normalize(Pair(x,y)))
-         let direction = atan2(normalized.x, normalized.y)
+         let direction = atan2(normalized.y, normalized.x)
          let magnitude = simd_length(Pair(x,y))
          return (direction:direction, magnitude:magnitude)
     }
@@ -92,7 +92,7 @@ extension PSVector {
 //MARK: Data acessors
 extension PSVector {
     
-    public var point:(x:Double, y:Double) {
+    public var components:(x:Double, y:Double) {
         (x: x, y: y)
     }
     
@@ -102,6 +102,11 @@ extension PSVector {
     
     public var y:Double {
         Double(vectorTriplet.y)
+    }
+    
+    public var polarComponets:(direction:Double, magnitude: Double) {
+        let pc = polarValue
+        return (Double(pc.direction), Double(pc.magnitude))
     }
     
     //MARK: Distances
@@ -207,24 +212,9 @@ extension PSVector {
     
     //MARK: Rotation
     
-    public func rotated(radians:Double) -> PSVector {
+    public func rotatedBy(radians:Double) -> PSVector {
         PSVector(rotatedTriplet(radians: Basic(radians)))
     }
-    
-    public func rotated(vector:PSVector) -> PSVector {
-        let radians = vector.angleFromNormalized
-        return PSVector(rotatedTriplet(radians: radians))
-    }
-    
-//    func makeRotationMatrix(vector:PSVector) -> Matrix3x3 {
-//        let rows = [
-//            Triplet(vector.normalized.x, -vector.normalized.y, 0),
-//            Triplet(vector.normalized.y, vector.normalized.x,  0),
-//            Triplet(           0,            0,  1)
-//        ]
-//
-//        return Matrix3x3(rows: rows)
-//    }
     
     func makeRotationMatrix(radians:Basic) -> Matrix3x3 {
         let rows = [
@@ -241,10 +231,10 @@ extension PSVector {
         return rotationMatrix * vectorTriplet
     }
     
-    func polarRotated(radians:Basic) -> (direction:Basic, magnitude:Basic) {
-        let rotated = rotatedTriplet(radians:radians)
-        return Self.toPolar(x: rotated.x, y: rotated.y)
-    }
+//    func polarRotated(radians:Basic) -> (direction:Basic, magnitude:Basic) {
+//        let rotated = rotatedTriplet(radians:radians)
+//        return Self.toPolar(x: rotated.x, y: rotated.y)
+//    }
     
     
     //MARK: Scale
@@ -359,4 +349,7 @@ extension PSVector {
         let random = Double.random(in:0...Double.pi*2)
         return PSVector(direction: random, magnitude: 1)
     }
+    
+    
+
 }

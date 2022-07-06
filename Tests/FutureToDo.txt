@@ -1,0 +1,99 @@
+//
+//  File.swift
+//  
+//
+//  Created by Labtanza on 7/6/22.
+////
+//
+//public func particleRotation(for particle:Particle, when timeInterval:Double) -> Angle {
+//    let interval = timeInterval - particle.creationDate
+//    //Shimmy
+//    //let rotation = sin(interval)
+//    //let angle = particle.startRotation.rotated(radians: rotation).asAngle
+//    
+//    let startRadians = particle.startAngularVelocity.radians
+//    let deltaTheta2 = particle.startAngularVelocity.radians * interval
+//    let angle2 = particle.startRotation.rotatedBy(radians: deltaTheta2).asAngle
+//    
+//    //let deltaTheta = PSVector(direction: sin(interval), magnitude:1)
+//    
+////            //TODO: They are turning but slowly. Compare to radians verison.
+//      //These numbers turn out very differently, of course
+////            let deltaTheta1 = particle.startAngularVelocity * interval
+////            let angle1 = particle.startRotation.rotated(vector: deltaTheta1).asAngle
+//
+//    //TODO: IS FALSE!!!
+//    //TODO: Coords are flipped?? How?
+//    let inoutVector = PSVector(direction: startRadians, magnitude: 1.0)
+//    let inoutRadians = inoutVector.radians
+//    let sv = particle.startAngularVelocity.components
+//    let iov = inoutVector.components
+//    let inoutTest = (startRadians == inoutRadians)
+//    let reverseInout = PSVector(PSVector.fromPolar(direction: inoutVector.angleFromNormalized, magnitude: 1))
+//    //print("rotation math - inout \(inoutTest): \(startRadians), \(inoutRadians)")
+//    //print("rotation math - inout \(inoutTest): \(sv), \(iov)")
+//    print("rotation math - inout \(iov)")
+//    print("angleChecks - \(inoutVector.radians), \(inoutVector.angleInRadians), \(inoutVector.angleFromNormalized), \(inoutVector.asAngle.radians) ")
+//    print("toPolar  \(PSVector.toPolar(x: Float(iov.x), y: Float(iov.y)).direction)")
+//    print("polarCoords \(inoutVector.polarComponets.direction)")
+//    print("fromPolar - length \(PSVector.fromPolar(direction: inoutVector.angleFromNormalized, magnitude: inoutVector.length).x)")
+//    print("fromPolar - from 1 \(PSVector.fromPolar(direction: inoutVector.angleFromNormalized, magnitude: 1).x)")
+//    
+//    let ioVrio = inoutRadians == reverseInout.radians
+//    let srVrio = startRadians == reverseInout.radians
+//    
+//    print("ioVrio: \(ioVrio), srVrio: \(srVrio) ")
+//    
+//    let deltaTheta1:Double = particle.startAngularVelocity.radians * interval
+//    let vdt = PSVector(direction: deltaTheta1, magnitude: 1.0)
+//    let angle1 = particle.startRotation.rotatedBy(vector: vdt).asAngle
+//    
+//    
+////            print("rotation math - *t = \(deltaTheta2), vdt_out\(vdt.radians)")
+//    
+//
+//    //print("calculating rotation: a1\(angle1), a2\(angle2)")
+//    
+//    return angle2
+//    
+////}
+//public static func testRotations() {
+//    let startVector = PSVector(direction: Double.pi, magnitude: 1.0)
+//    print("Start vector: \(startVector.asAngle.degrees), \(startVector.components)")
+//    
+//    let rotation = Angle(degrees: 90)
+//    
+//    let rotationAsVector = PSVector(direction: rotation.radians, magnitude: 1)
+//    print("Rotation vector: \(rotationAsVector.asAngle.degrees), \(rotationAsVector.components)")
+//    
+//    let angle1 = startVector.rotatedBy(radians: rotation.radians).asAngle.degrees
+//    let angle2 = startVector.rotatedBy(vector: rotationAsVector).asAngle.degrees
+//    
+//    print("Calculated by - radians:\(angle1), vector:\(angle2)")
+//}
+//public func rotatedBy(vector:PSVector) -> PSVector {
+//    //let radians = vector.angleFromNormalized
+//    return PSVector(rotatedTriplet(vector: vector))
+//}
+//
+//func makeRotationMatrix(vector:PSVector) -> Matrix3x3 {
+//    let rows = [
+//        Triplet(vector.normalized.x, -vector.normalized.y, 0),
+//        Triplet(vector.normalized.y, vector.normalized.x,  0),
+//        Triplet(           0,            0,  1)
+//    ]
+//
+//    return Matrix3x3(rows: rows)
+//}
+//func rotatedTriplet(vector:PSVector) -> Triplet {
+//    let rotationMatrix = makeRotationMatrix(vector: vector)
+//    return rotationMatrix * vectorTriplet
+//}
+//let angle = Angle(radians: direction)
+//print("Creating particle tht should be headed: \(angle.degrees)")
+//
+//let velocityVector = PSVector(direction: direction, magnitude: magnitude)
+//print("It is headed to: \(velocityVector.asAngle.degrees)")
+//let x = cos(direction) * magnitude
+//let y = sin(direction) * magnitude
+//print("hand calc (x: \(x), y: \(y))  vector (x: \(velocityVector.x), y: \(velocityVector.y))")

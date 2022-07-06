@@ -128,8 +128,13 @@ public extension ParticleSystem {
         public func particleLocation(for particle:Particle, when timeInterval:Double) -> (x:Double, y:Double)? {
             let interval = timeInterval - particle.creationDate
             
-            let distanceToTravel = particle.startVelocity * interval
-            let position = particle.startPosistion + distanceToTravel
+            //let distanceToTravel = particle.startVelocity * interval
+            //let position = particle.startPosistion + distanceToTravel
+            
+            let dx = particle.startVelocity.x * interval
+            let dy = particle.startVelocity.y * interval
+            
+            let position = (x: particle.startPosistion.x + dx, y: particle.startPosistion.y + dy)
             
             //TODO: Rewrite using simd? Don't like that his is done in here at all actually
             //At somepoint there should be a particle store cleaner? Asyc on an actor style?
@@ -149,57 +154,26 @@ public extension ParticleSystem {
             //let rotation = sin(interval)
             //let angle = particle.startRotation.rotated(radians: rotation).asAngle
             
-            let startRadians = particle.startAngularVelocity.radians
-            let deltaTheta2 = particle.startAngularVelocity.radians * interval
-            let angle2 = particle.startRotation.rotated(radians: deltaTheta2).asAngle
+            let startVelocityRadians = particle.startAngularVelocity.radians
+            let deltaTheta = startVelocityRadians * interval
+            let angle = particle.startRotation.rotatedBy(radians: deltaTheta).asAngle
             
-            //let deltaTheta = PSVector(direction: sin(interval), magnitude:1)
-            
-//            //TODO: They are turning but slowly. Compare to radians verison.
-              //These numbers turn out very differently, of course
-//            let deltaTheta1 = particle.startAngularVelocity * interval
-//            let angle1 = particle.startRotation.rotated(vector: deltaTheta1).asAngle
-
-            //TODO: IS FALSE!!!
-            //TODO: Coords are flipped?? How?
-            let inoutVector = PSVector(direction: startRadians, magnitude: 1.0)
-            let inoutRadians = inoutVector.radians
-            let sv = particle.startAngularVelocity.vectorPair
-            let iov = inoutVector.vectorPair
-            let inoutTest = (startRadians == inoutRadians)
-            let reverseInout = PSVector(PSVector.fromPolar(direction: inoutVector.angleFromNormalized, magnitude: 1))
-            //print("rotation math - inout \(inoutTest): \(startRadians), \(inoutRadians)")
-            //print("rotation math - inout \(inoutTest): \(sv), \(iov)")
-            print("rotation math - inout \(iov)")
-            print("angleChecks - \(inoutVector.radians), \(inoutVector.angleInRadians), \(inoutVector.angleFromNormalized), \(inoutVector.asAngle.radians) ")
-            print("toPolar  \(PSVector.toPolar(x: iov.x, y: iov.y).direction)")
-            print("polarCoords \(inoutVector.polarValue.direction)")
-            print("fromPolar - length \(PSVector.fromPolar(direction: inoutVector.angleFromNormalized, magnitude: inoutVector.length).x)")
-            print("fromPolar - length \(PSVector.fromPolar(direction: inoutVector.angleFromNormalized, magnitude: 1).x)")
-            
-            let ioVrio = inoutRadians == reverseInout.radians
-            let srVrio = startRadians == reverseInout.radians
-            
-            print("ioVrio: \(ioVrio), srVrio: \(srVrio) ")
-            
-            let deltaTheta1:Double = particle.startAngularVelocity.radians * interval
-            let vdt = PSVector(direction: deltaTheta1, magnitude: 1.0)
-            let angle1 = particle.startRotation.rotated(vector: vdt).asAngle
-            
-            
-//            print("rotation math - *t = \(deltaTheta2), vdt_out\(vdt.radians)")
-            
-
-            //print("calculating rotation: a1\(angle1), a2\(angle2)")
-            
-            return angle2
+            return angle
             
         }
         
-        
-        
         func createParticle(x:Double, y:Double, direction:Double, magnitude:Double) -> Particle {
-            Particle (
+//            let angle = Angle(radians: direction)
+//            print("Creating particle tht should be headed: \(angle.degrees)")
+//
+//            let velocityVector = PSVector(direction: direction, magnitude: magnitude)
+//            print("It is headed to: \(velocityVector.asAngle.degrees)")
+//            let x = cos(direction) * magnitude
+//            let y = sin(direction) * magnitude
+//            print("hand calc (x: \(x), y: \(y))  vector (x: \(velocityVector.x), y: \(velocityVector.y))")
+            
+            
+            return Particle (
                 startPosistion: PSVector(x,y),
                 startVelocity: PSVector(direction: direction, magnitude: magnitude),
                 startRotation: PSVector.randomNormalized,

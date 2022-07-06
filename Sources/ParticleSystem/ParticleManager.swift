@@ -9,32 +9,46 @@ import Foundation
 import SwiftUI
 
 
-    
-public extension ParticleSystem {
-        struct Profile:Codable {
-            
-            //Spawning
-            public var timeBetweenSpawnsInSeconds = 1.0
-            
-            //how much chaos
-            public var angleRange:ClosedRange<Double>
-            public var angleWobble:Double
-            public var magnitudeRange:ClosedRange<Double>
-            public var magnitudeWobble:Double
-            public var angularVelocityRange:ClosedRange<Double>
-        }
-    }
 
-    fileprivate extension ParticleSystem.Profile {
-        init() {
-            timeBetweenSpawnsInSeconds = 1.0
-            angleRange = 0...(2.0 * Double.pi)
-            angleWobble = 0.2
-            magnitudeRange = 0.01...0.3
-            magnitudeWobble = 0.05
-            angularVelocityRange = 0.01...0.3
-        }
+public extension ParticleSystem {
+    struct Profile:Codable {
+        
+        //Spawning
+        public var timeBetweenSpawnsInSeconds:Double
+        
+        //how much chaos
+        public var coreAngle:Double
+        public var angleWobble:Double
+
+        public var coreMagnitude:Double
+        public var magnitudeWobble:Double
+        
     }
+}
+public extension ParticleSystem.Profile {
+    init(coreAngle:Double = 0.0,
+         coreMagnitude:Double = 0.15,
+         spawnLag:Double = 1.0,
+         angleWobble:Double = Double.pi,
+         magnitudeWobble:Double = 0.05) {
+        self.coreAngle = coreAngle
+        self.coreMagnitude = coreMagnitude
+        self.timeBetweenSpawnsInSeconds = spawnLag
+        self.angleWobble = angleWobble
+        self.magnitudeWobble = magnitudeWobble
+    }
+}
+
+fileprivate extension ParticleSystem.Profile {
+    init() {
+    coreAngle = 0.0
+    coreMagnitude = 0.15
+    timeBetweenSpawnsInSeconds = 1.0
+    timeBetweenSpawnsInSeconds = 1.0
+    angleWobble = Double.pi
+    magnitudeWobble = 0.05
+    }
+}
 
 public extension ParticleSystem {
     
@@ -66,10 +80,13 @@ public extension ParticleSystem {
         public private(set) var origin = (x:0.0, y:0.0)
         
         //Emission Ranges -- Updateable
-        //        public private(set) var angleRange = 0...(2.0 * Double.pi)
-        //        public private(set) var angleWobble = 0.2
-        //        public private(set) var magnitudeRange = 0.01...0.3
-        //        public private(set) var magnitudeWobble = 0.05
+        public var angleRange:ClosedRange<Double> {
+            (profile.coreAngle - profile.angleWobble)...(profile.coreAngle + profile.angleWobble)
+        }
+  
+        public var magnitudeRange:ClosedRange<Double> {
+            max((profile.coreMagnitude - profile.magnitudeWobble), 0.01)...(profile.coreMagnitude + profile.magnitudeWobble) //always a little
+        }
         
         public init() {}
         
@@ -88,26 +105,25 @@ public extension ParticleSystem {
         }
         
         public func updateStartingVelocity(direction:Double, magnitude:Double) {
-            profile.angleRange = (direction - profile.angleWobble)...(direction + profile.angleWobble)
-            profile.magnitudeRange = max((magnitude - profile.magnitudeWobble), 0.01)...(magnitude + profile.magnitudeWobble) //always a little
-            
+            profile.coreAngle = direction
+            profile.coreMagnitude = magnitude
         }
         
         public var birthRatePerSecond:Double {
-                1/(profile.timeBetweenSpawnsInSeconds)
+            1/(profile.timeBetweenSpawnsInSeconds)
         }
-         
-         public func updateOrigin(_ newCoords:(Double, Double)){
-             self.origin = newCoords
-             //print("origin - \(self.origin.x), \(self.origin.y)")
-         }
-         
-         public func updateOrigin(_ x:Double, _ y:Double) {
-             self.origin = (x,y)
-             //print("origin - \(self.origin.x), \(self.origin.y)")
-         }
         
-        //TODO: Replace with clock??? 
+        public func updateOrigin(_ newCoords:(Double, Double)){
+            self.origin = newCoords
+            //print("origin - \(self.origin.x), \(self.origin.y)")
+        }
+        
+        public func updateOrigin(_ x:Double, _ y:Double) {
+            self.origin = (x,y)
+            //print("origin - \(self.origin.x), \(self.origin.y)")
+        }
+        
+        //TODO: Replace with clock???
         private func checkTimer(currentTime:Double) -> Bool {
             if currentTime > updateTime {
                 updateTime = currentTime + profile.timeBetweenSpawnsInSeconds
@@ -128,13 +144,12 @@ public extension ParticleSystem {
         public func particleLocation(for particle:Particle, when timeInterval:Double) -> (x:Double, y:Double)? {
             let interval = timeInterval - particle.creationDate
             
-            //let distanceToTravel = particle.startVelocity * interval
-            //let position = particle.startPosistion + distanceToTravel
+            let distanceToTravel = particle.startVelocity * interval
+            let position = particle.startPosistion + distanceToTravel
             
-            let dx = particle.startVelocity.x * interval
-            let dy = particle.startVelocity.y * interval
-            
-            let position = (x: particle.startPosistion.x + dx, y: particle.startPosistion.y + dy)
+            //            let dx = particle.startVelocity.x * interval
+            //            let dy = particle.startVelocity.y * interval
+            //            let position = (x: particle.startPosistion.x + dx, y: particle.startPosistion.y + dy)
             
             //TODO: Rewrite using simd? Don't like that his is done in here at all actually
             //At somepoint there should be a particle store cleaner? Asyc on an actor style?
@@ -163,17 +178,7 @@ public extension ParticleSystem {
         }
         
         func createParticle(x:Double, y:Double, direction:Double, magnitude:Double) -> Particle {
-//            let angle = Angle(radians: direction)
-//            print("Creating particle tht should be headed: \(angle.degrees)")
-//
-//            let velocityVector = PSVector(direction: direction, magnitude: magnitude)
-//            print("It is headed to: \(velocityVector.asAngle.degrees)")
-//            let x = cos(direction) * magnitude
-//            let y = sin(direction) * magnitude
-//            print("hand calc (x: \(x), y: \(y))  vector (x: \(velocityVector.x), y: \(velocityVector.y))")
-            
-            
-            return Particle (
+            Particle (
                 startPosistion: PSVector(x,y),
                 startVelocity: PSVector(direction: direction, magnitude: magnitude),
                 startRotation: PSVector.randomNormalized,
@@ -185,8 +190,8 @@ public extension ParticleSystem {
         
         //can't use variable as a default
         func createParticle() -> Particle {
-            let direction = Double.random(in: profile.angleRange)//Angle(degrees: 30).radians//1.0 * Double.pi //
-            let maginitude = Double.random(in: profile.magnitudeRange)
+            let direction = Double.random(in: angleRange)//Angle(degrees: 30).radians//1.0 * Double.pi //
+            let maginitude = Double.random(in: magnitudeRange)
             return createParticle(x: origin.x, y: origin.y, direction: direction, magnitude: maginitude)
         }
     }

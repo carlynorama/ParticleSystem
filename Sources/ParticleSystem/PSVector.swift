@@ -8,13 +8,11 @@
 import Foundation
 import SwiftUI //For Vector Arithmatic Complaince if I want it in the future
 
-//TODO: Use Accelrate instead???
-//see https://swiftwithmajid.com/2020/06/17/the-magic-of-animatable-values-in-swiftui/
-//import Accelerate
+//Note to self simd IS part of accelrate.
 import simd
 
-//wanted so can be wonton in terms of input types of public functions? but not yet done.
-//import Numerics,
+//wanted so can be wonton in terms of input types of public functions, but not yet done.
+//import Numerics
 
 
 ////https://developer.apple.com/documentation/accelerate/working_with_vectors
@@ -26,52 +24,47 @@ public struct PSVector {
     //typealias ValidInputType = Real
     public typealias Basic = Float
     public typealias Triplet = SIMD3<Basic>
-    public typealias Pair = SIMD2<Basic> //TODO: can't just call pair because using taht type alias already in package
+    public typealias Pair = SIMD2<Basic>
     //TODO: as function of Basic??
     //Doesnot look like there is a way to decalre a 3x3 as a type.
     //There is simd_double3x3, maybe just punt everything to that
-    public typealias Matrix3x3 = simd_float3x3
+    public typealias Matrix3x3 = simd_float3x3  //there is also simd_double3x3
     static public let identityMatrix3x3 =  matrix_identity_float3x3 as Matrix3x3
 
-    
-    //By representing 2D coordinates as a three-element vector, you can
+    //Why is data saved as a triplet (quaternian) intead os a pair?
+    //see reccomendation https://developer.apple.com/documentation/accelerate/working_with_vectors
+    //"By representing 2D coordinates as a three-element vector, you can
     //transform points using matrix multiplication. Typically,
-    //the third component of the vector, z, is set to 1, which //
-    //indicates that the vector represents a position in space.
-    private var transformationVector:Triplet  //(x: 3, y: 2, z: 1)
+    //the third component of the vector, z, is set to 1, which
+    //indicates that the vector represents a position in space."
+    //
+    //Is a var to have animatable data conformance. TBD is really necessary.
+    private var vectorTriplet:Triplet  //(x: 3, y: 2, z: 1)
     
-    //How much does this slow the math down?
-    var vectorPair:Pair {
-        Pair(transformationVector.x, transformationVector.y)
+    //TODO: How much does this being calculated slow the math down
+    //hard code at init and have setters that update each other?
+    private var vectorPair:Pair {
+        Pair(vectorTriplet.x, vectorTriplet.y)
     }
     
-    var polarValue:(direction:Basic, magnitude:Basic) {
-        let direction = angleFromNormalized
+    //TODO: How much does this being calculated slow the math down
+    //hard code at init and have setters that update each other?
+    private var polarValue:(direction:Basic, magnitude:Basic) {
+        let direction = angleFromNormalized //TODO: probably don't need to normalize?
         let magnitude = length
         return (direction, magnitude)
     }
-    
-    public var point:(x:Double, y:Double) {
-        (x: x, y: y)
-    }
-    
-    public var x:Double {
-        Double(transformationVector.x)
-    }
-    
-    public var y:Double {
-        Double(transformationVector.y)
-    }
-    
 }
 
+
+//MARK: Initializers
 extension PSVector {
     init(_ x:Double, _ y:Double) {
-        self.transformationVector = Triplet(x:Basic(x), y:Basic(y), z:1)
+        self.vectorTriplet = Triplet(x:Basic(x), y:Basic(y), z:1)
     }
     
     init(_ triplet:Triplet) {
-        self.transformationVector = triplet
+        self.vectorTriplet = triplet
     }
     
     //TODO: WHY IS THIS BACKWARDS??? flips the coordinates when done correctly?
@@ -89,15 +82,28 @@ extension PSVector {
     }
     
     init(direction:Basic, magnitude:Basic) {
-        self.transformationVector = Self.fromPolar(direction: direction, magnitude: magnitude)
+        self.vectorTriplet = Self.fromPolar(direction: direction, magnitude: magnitude)
     }
     
     init(direction:Double, magnitude:Double) {
-        self.transformationVector = Self.fromPolar(direction: Basic(direction), magnitude: Basic(magnitude))
+        self.vectorTriplet = Self.fromPolar(direction: Basic(direction), magnitude: Basic(magnitude))
     }
 }
 
+//MARK: Data acessors
 extension PSVector {
+    
+    public var point:(x:Double, y:Double) {
+        (x: x, y: y)
+    }
+    
+    public var x:Double {
+        Double(vectorTriplet.x)
+    }
+    
+    public var y:Double {
+        Double(vectorTriplet.y)
+    }
     
     //MARK: Distances
     //distance from 0,0
@@ -134,7 +140,7 @@ extension PSVector {
     }
     
     var angleInRadians:Basic {
-        atan2(transformationVector.y, transformationVector.x)
+        atan2(vectorTriplet.y, vectorTriplet.x)
     }
     
     public var radians:Double {
@@ -145,13 +151,18 @@ extension PSVector {
         Angle(radians: radians)
     }
     
+}
+
+//MARK: Transformations
+extension PSVector {
+    
     //MARK: Multiball Transfomations
     
     func transformed(dx tx:Basic, dy ty:Basic, radians:Basic, xscale:Basic, yscale:Basic) -> Triplet{
         let rMatrix = makeRotationMatrix(radians: radians)
         let sMatrix = makeScaleMatrix(xScale: xscale, yScale: yscale)
         let tMatrix = makeTranslationMatrix(tx: tx, ty: ty)
-        return tMatrix * rMatrix * sMatrix * transformationVector
+        return tMatrix * rMatrix * sMatrix * vectorTriplet
     }
     
     
@@ -172,7 +183,7 @@ extension PSVector {
     
     func translated(dx tx:Basic, dy ty:Basic) -> Triplet {
         let translationMatrix = makeTranslationMatrix(tx: tx, ty: ty)
-        return translationMatrix * transformationVector
+        return translationMatrix * vectorTriplet
     }
     
     func translatedXY(dx tx:Basic, dy ty:Basic) -> (x:Basic, y:Basic) {
@@ -228,7 +239,7 @@ extension PSVector {
     
     func rotatedTriplet(radians:Basic) -> Triplet {
         let rotationMatrix = makeRotationMatrix(radians: radians)
-        return rotationMatrix * transformationVector
+        return rotationMatrix * vectorTriplet
     }
     
     func polarRotated(radians:Basic) -> (direction:Basic, magnitude:Basic) {
@@ -251,7 +262,7 @@ extension PSVector {
     
     func scaled(xScale:Basic, yScale:Basic) -> Triplet{
         let scaleMatrix = makeScaleMatrix(xScale: xScale, yScale: yScale)
-        return scaleMatrix * transformationVector
+        return scaleMatrix * vectorTriplet
     }
     
     func scaled(by scale:Basic) -> Triplet{
@@ -262,69 +273,31 @@ extension PSVector {
     
 }
 
-
-//
-//struct PSVector {
-//    let magnitude:Double
-//    let theta:VAngle
-//    
-//    let i:Double
-//    let j:Double
-//    
-//    init(x:Double, y:Double) {
-//        self.i = x
-//        self.j = y
-//        self.theta = VAngle(x: x, y: y)
-//        self.magnitude = Self.calculateMagnitude(x: x, y: y)
-//    }
-//    
-//    init(i:Double, j:Double) {
-//        self.magnitude = 1
-//        self.i = i
-//        self.j = j
-//        self.theta = VAngle(x: i, y: j)
-//    }
-//    
-//    init(_ radians:Double, magnitude:Double = 1.0) {
-//        self.theta = VAngle(radians)
-//        (self.i, self.j) = self.theta.vectorComponents
-//        self.magnitude = magnitude
-//    }
-//    
-//    init(degrees:Double, magnitude:Double = 1.0) {
-//        self = Self.init(degrees.asRadians, magnitude: magnitude)
-//    }
-//    
-//    static func calculateMagnitude(x a:Double, y b:Double) -> Double {
-//        sqrt(a.sqrd + b.sqrd)
-//    }
-//
-//}
-//
-extension PSVector:VectorArithmetic {
+//MARK: Arithmatic, Multiplication, Animatable
+extension PSVector:Animatable {
     public static var zero:PSVector {
-        return Self(transformationVector: Triplet(0,0,0))
+        return Self(vectorTriplet: Triplet(0,0,0))
     }
     
     public mutating func scale(by rhs: Double) {
-        self.transformationVector = self.scaled(by: Basic(rhs))
+        self.vectorTriplet = self.scaled(by: Basic(rhs))
     }
 
     public var magnitudeSquared: Double {
         //square everyone and sum
-        Double((self.transformationVector * self.transformationVector).sum())
+        Double((self.vectorTriplet * self.vectorTriplet).sum())
     }
     
     public static func + (lhs:PSVector, rhs:PSVector) -> PSVector {
 //        let x = lhs.i + rhs.i
 //        let y = lhs.j + rhs.j
-        let new = lhs.transformationVector + rhs.transformationVector
-        return Self(transformationVector: new)
+        let new = lhs.vectorTriplet + rhs.vectorTriplet
+        return Self(vectorTriplet: new)
     }
     
     static func * (lhs:PSVector, rhs:Basic) -> PSVector {
-        let new = lhs.transformationVector * rhs
-        return Self(transformationVector: new)
+        let new = lhs.vectorTriplet * rhs
+        return Self(vectorTriplet: new)
     }
     
     static func * (lhs:PSVector, rhs:Double) -> PSVector {
@@ -334,14 +307,14 @@ extension PSVector:VectorArithmetic {
     public static func - (lhs:PSVector, rhs:PSVector) -> PSVector {
         //let x = lhs.i - rhs.i
         //let y = lhs.j - rhs.j
-        let new = lhs.transformationVector - rhs.transformationVector
-        return Self(transformationVector: new)
+        let new = lhs.vectorTriplet - rhs.vectorTriplet
+        return Self(vectorTriplet: new)
     }
     
     //Rotate 180 degrees, so each component * -1
     static prefix func - (vector: PSVector) -> PSVector {
-        let new = vector.transformationVector * -1
-        return Self(transformationVector: new)
+        let new = vector.vectorTriplet * -1
+        return Self(vectorTriplet: new)
     }
     
     public static func += (lhs: inout PSVector, rhs: PSVector) {
@@ -349,11 +322,12 @@ extension PSVector:VectorArithmetic {
     }
     
     public static func == (lhs: PSVector, rhs: PSVector) -> Bool {
-        return (lhs.transformationVector == rhs.transformationVector)
+        return (lhs.vectorTriplet == rhs.vectorTriplet)
     }
     
 }
 
+//MARK: Random and sample data
 extension PSVector {
     static var randomNormalized:PSVector {
         let random = Double.random(in:0...Double.pi*2)

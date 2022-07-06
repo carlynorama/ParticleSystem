@@ -149,10 +149,50 @@ public extension ParticleSystem {
             //let rotation = sin(interval)
             //let angle = particle.startRotation.rotated(radians: rotation).asAngle
             
-            let deltaTheta = particle.startAngularVelocity.radians * interval
-            let angle = particle.startRotation.rotated(radians: deltaTheta).asAngle
+            let startRadians = particle.startAngularVelocity.radians
+            let deltaTheta2 = particle.startAngularVelocity.radians * interval
+            let angle2 = particle.startRotation.rotated(radians: deltaTheta2).asAngle
             
-            return angle
+            //let deltaTheta = PSVector(direction: sin(interval), magnitude:1)
+            
+//            //TODO: They are turning but slowly. Compare to radians verison.
+              //These numbers turn out very differently, of course
+//            let deltaTheta1 = particle.startAngularVelocity * interval
+//            let angle1 = particle.startRotation.rotated(vector: deltaTheta1).asAngle
+
+            //TODO: IS FALSE!!!
+            //TODO: Coords are flipped?? How?
+            let inoutVector = PSVector(direction: startRadians, magnitude: 1.0)
+            let inoutRadians = inoutVector.radians
+            let sv = particle.startAngularVelocity.vectorPair
+            let iov = inoutVector.vectorPair
+            let inoutTest = (startRadians == inoutRadians)
+            let reverseInout = PSVector(PSVector.fromPolar(direction: inoutVector.angleFromNormalized, magnitude: 1))
+            //print("rotation math - inout \(inoutTest): \(startRadians), \(inoutRadians)")
+            //print("rotation math - inout \(inoutTest): \(sv), \(iov)")
+            print("rotation math - inout \(iov)")
+            print("angleChecks - \(inoutVector.radians), \(inoutVector.angleInRadians), \(inoutVector.angleFromNormalized), \(inoutVector.asAngle.radians) ")
+            print("toPolar  \(PSVector.toPolar(x: iov.x, y: iov.y).direction)")
+            print("polarCoords \(inoutVector.polarValue.direction)")
+            print("fromPolar - length \(PSVector.fromPolar(direction: inoutVector.angleFromNormalized, magnitude: inoutVector.length).x)")
+            print("fromPolar - length \(PSVector.fromPolar(direction: inoutVector.angleFromNormalized, magnitude: 1).x)")
+            
+            let ioVrio = inoutRadians == reverseInout.radians
+            let srVrio = startRadians == reverseInout.radians
+            
+            print("ioVrio: \(ioVrio), srVrio: \(srVrio) ")
+            
+            let deltaTheta1:Double = particle.startAngularVelocity.radians * interval
+            let vdt = PSVector(direction: deltaTheta1, magnitude: 1.0)
+            let angle1 = particle.startRotation.rotated(vector: vdt).asAngle
+            
+            
+//            print("rotation math - *t = \(deltaTheta2), vdt_out\(vdt.radians)")
+            
+
+            //print("calculating rotation: a1\(angle1), a2\(angle2)")
+            
+            return angle2
             
         }
         

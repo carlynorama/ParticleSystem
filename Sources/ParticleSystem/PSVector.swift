@@ -46,7 +46,7 @@ public struct PSVector {
     }
     
     var polarValue:(direction:Basic, magnitude:Basic) {
-        let direction = angle
+        let direction = angleFromNormalized
         let magnitude = length
         return (direction, magnitude)
     }
@@ -70,10 +70,15 @@ extension PSVector {
         self.transformationVector = Triplet(x:Basic(x), y:Basic(y), z:1)
     }
     
+    init(_ triplet:Triplet) {
+        self.transformationVector = triplet
+    }
+    
+    //TODO: WHY IS THIS BACKWARDS??? flips the coordinates when done correctly?
     static func fromPolar(direction:Basic, magnitude:Basic) -> Triplet {
-            let i = cos(direction) * magnitude
-            let j = sin(direction) * magnitude
-        return Triplet(x:i, y:j, z:1)
+            let x = cos(direction) * magnitude
+            let y = sin(direction) * magnitude
+        return Triplet(x:y, y:x, z:1)
     }
     
     static func toPolar(x:Basic, y:Basic) -> (direction:Basic, magnitude:Basic) {
@@ -124,12 +129,16 @@ extension PSVector {
         simd_normalize(vectorPair)
     }
     
-    var angle:Basic {
-        atan2(normalized.x, normalized.y)
+    var angleFromNormalized:Basic {
+        atan2(normalized.y, normalized.x)
+    }
+    
+    var angleInRadians:Basic {
+        atan2(transformationVector.y, transformationVector.x)
     }
     
     public var radians:Double {
-        Double(angle)
+        Double(angleFromNormalized)
     }
     
     public var asAngle:Angle {
@@ -189,26 +198,41 @@ extension PSVector {
     //MARK: Rotation
     
     public func rotated(radians:Double) -> PSVector {
-        PSVector(transformationVector: rotated(radians: Basic(radians)))
+        PSVector(rotatedTriplet(radians: Basic(radians)))
     }
+    
+    public func rotated(vector:PSVector) -> PSVector {
+        let radians = vector.angleFromNormalized
+        return PSVector(rotatedTriplet(radians: radians))
+    }
+    
+//    func makeRotationMatrix(vector:PSVector) -> Matrix3x3 {
+//        let rows = [
+//            Triplet(vector.normalized.x, -vector.normalized.y, 0),
+//            Triplet(vector.normalized.y, vector.normalized.x,  0),
+//            Triplet(           0,            0,  1)
+//        ]
+//
+//        return Matrix3x3(rows: rows)
+//    }
     
     func makeRotationMatrix(radians:Basic) -> Matrix3x3 {
         let rows = [
-            simd_float3(cos(radians), -sin(radians), 0),
-            simd_float3(sin(radians), cos(radians),  0),
-            simd_float3(           0,            0,  1)
+            Triplet(cos(radians), -sin(radians), 0),
+            Triplet(sin(radians), cos(radians),  0),
+            Triplet(           0,            0,  1)
         ]
         
         return Matrix3x3(rows: rows)
     }
     
-    func rotated(radians:Basic) -> Triplet {
+    func rotatedTriplet(radians:Basic) -> Triplet {
         let rotationMatrix = makeRotationMatrix(radians: radians)
         return rotationMatrix * transformationVector
     }
     
     func polarRotated(radians:Basic) -> (direction:Basic, magnitude:Basic) {
-        let rotated = rotated(radians:radians)
+        let rotated = rotatedTriplet(radians:radians)
         return Self.toPolar(x: rotated.x, y: rotated.y)
     }
     

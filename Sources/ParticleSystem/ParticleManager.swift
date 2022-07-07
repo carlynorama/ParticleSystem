@@ -76,7 +76,7 @@ public extension ParticleSystem {
         //System Features
         private let maxCount = 1000
         //TODO: This should be determined by what/who exactly?
-        private let visiblebounds = -2...2
+        private let visiblebounds = -2.0...2.0
         
         //Sub-Timing
         

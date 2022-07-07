@@ -23,6 +23,12 @@ public extension ParticleSystem {
         public var coreMagnitude:Double
         public var magnitudeWobble:Double
         
+        public var coreSpinVelocity:Double
+        public var spinWobble:Double
+        
+        public var coreMassValue:Double
+        public var coreRadiusValue:Double
+        
     }
 }
 public extension ParticleSystem.Profile {
@@ -30,12 +36,18 @@ public extension ParticleSystem.Profile {
          coreMagnitude:Double = 0.15,
          spawnLag:Double = 1.0,
          angleWobble:Double = Double.pi,
-         magnitudeWobble:Double = 0.05) {
+         magnitudeWobble:Double = 0.05,
+         coreSpinVelocity:Double = 0.5,
+         spinWobble:Double = 0.5) {
         self.coreAngle = coreAngle
         self.coreMagnitude = coreMagnitude
         self.timeBetweenSpawnsInSeconds = spawnLag
         self.angleWobble = angleWobble
         self.magnitudeWobble = magnitudeWobble
+        self.coreSpinVelocity = coreSpinVelocity
+        self.spinWobble = spinWobble
+        self.coreMassValue = 0.5
+        self.coreRadiusValue = 0.5
     }
 }
 
@@ -47,6 +59,10 @@ fileprivate extension ParticleSystem.Profile {
     timeBetweenSpawnsInSeconds = 1.0
     angleWobble = Double.pi
     magnitudeWobble = 0.05
+    coreSpinVelocity = 0.5
+    spinWobble = 0.5
+        coreMassValue = 0.5
+        coreRadiusValue = 0.5
     }
 }
 
@@ -72,7 +88,7 @@ public extension ParticleSystem {
         // density of water at 4°C is 1000.0    kg/m3 or 1.0      g/ml
         // density of air at   5°C is    1.2690 kg/m3 or 0.001269 g/ml
         // density of air at  20°C is    1.2041 kg/m3 or 0.001204 g/ml
-        public private(set) var massScalarRange = 0.01...1.0
+        //public private(set) var massScalarRange = 0.01...1.0
         public private(set) var radiusScalarRange = 0.01...1.0
         
         //Spawning
@@ -86,6 +102,18 @@ public extension ParticleSystem {
   
         public var magnitudeRange:ClosedRange<Double> {
             max((profile.coreMagnitude - profile.magnitudeWobble), 0.01)...(profile.coreMagnitude + profile.magnitudeWobble) //always a little
+        }
+        
+        public var spinVelocityRange:ClosedRange<Double> {
+            max((profile.coreSpinVelocity - profile.spinWobble), 0.01)...(profile.coreSpinVelocity + profile.spinWobble) //always a little
+        }
+        
+        public var massRange:ClosedRange<Double> {
+            0.01...1.0
+        }
+        
+        public var radiusRange:ClosedRange<Double> {
+            0.01...1.0
         }
         
         public init() {}
@@ -169,7 +197,7 @@ public extension ParticleSystem {
             //let rotation = sin(interval)
             //let angle = particle.startRotation.rotated(radians: rotation).asAngle
             
-            let startVelocityRadians = particle.startAngularVelocity.radians
+            let startVelocityRadians = particle.startSpinVelocity.radians
             let deltaTheta = startVelocityRadians * interval
             let angle = particle.startRotation.rotatedBy(radians: deltaTheta).asAngle
             
@@ -182,9 +210,9 @@ public extension ParticleSystem {
                 startPosistion: PSVector(x,y),
                 startVelocity: PSVector(direction: direction, magnitude: magnitude),
                 startRotation: PSVector.randomNormalized,
-                startAngularVelocity: PSVector.randomNormalized,
-                mass: Double.random(in: massScalarRange),
-                radius: Double.random(in: radiusScalarRange)
+                startSpinVelocity: PSVector.randomNormalized(in: spinVelocityRange),
+                mass: Double.random(in: massRange),
+                radius: Double.random(in: radiusRange)
             )
         }
         

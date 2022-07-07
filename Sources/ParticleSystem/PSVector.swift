@@ -350,6 +350,11 @@ extension PSVector {
         return PSVector(direction: random, magnitude: 1)
     }
     
+    static func randomNormalized(in range:ClosedRange<Double>) -> PSVector {
+        let random = Double.random(in:range)
+        return PSVector(direction: random, magnitude: 1)
+    }
+    
     
 
 }

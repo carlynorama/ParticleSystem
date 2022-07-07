@@ -30,6 +30,9 @@ public extension ParticleSystem {
             Date.now.timeIntervalSinceReferenceDate - creationDate
         }
         
+        // density of water at 4°C is 1000.0    kg/m3 or 1.0      g/ml
+        // density of air at   5°C is    1.2690 kg/m3 or 0.001269 g/ml
+        // density of air at  20°C is    1.2041 kg/m3 or 0.001204 g/ml
         public var density:Double {
             mass/radius
         }

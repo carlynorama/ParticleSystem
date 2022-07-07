@@ -76,7 +76,7 @@ public extension ParticleSystem {
         //System Features
         private let maxCount = 1000
         //TODO: This should be determined by what/who exactly?
-        private let visiblebounds = -1.25...1.25
+        private let visiblebounds = -2...2
         
         //Sub-Timing
         
@@ -84,12 +84,6 @@ public extension ParticleSystem {
         
         //Particle Representation
         public let particleRepresentation = Image(systemName: "sparkle")
-        
-        // density of water at 4°C is 1000.0    kg/m3 or 1.0      g/ml
-        // density of air at   5°C is    1.2690 kg/m3 or 0.001269 g/ml
-        // density of air at  20°C is    1.2041 kg/m3 or 0.001204 g/ml
-        //public private(set) var massScalarRange = 0.01...1.0
-        public private(set) var radiusScalarRange = 0.01...1.0
         
         //Spawning
         //private var birthRate = 1.0

@@ -18,8 +18,8 @@ public extension ParticleSystem {
         public let startVelocity:PSVector
         
         public let startRotation:PSVector
-        public let startSpinVelocity:PSVector  //SIUnit radians per second
-        public let rotationPoint = PSVector(0,0)
+        public let startSpinVelocity:Double  //SIUnit radians per second
+        public let rotationPoint = PSVector(0.0,0.0)
         
         
         //physical properties

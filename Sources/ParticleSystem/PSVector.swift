@@ -6,6 +6,7 @@
 ////
 //
 import Foundation
+//import Algorithms //for sample data
 import SwiftUI //For Vector Arithmatic Complaince if I want it in the future
 
 //Note to self simd IS part of accelrate.
@@ -29,6 +30,9 @@ public struct PSVector {
     //There is simd_double3x3, maybe just punt everything to that
     public typealias Matrix3x3 = simd_float3x3  //there is also simd_double3x3
     static public let identityMatrix3x3 =  matrix_identity_float3x3 as Matrix3x3
+    
+    static let π = Basic.pi
+    static let tau = 2*Basic.pi
 
     //Why is data saved as a triplet (quaternian) intead os a pair?
     //see reccomendation https://developer.apple.com/documentation/accelerate/working_with_vectors
@@ -49,7 +53,7 @@ public struct PSVector {
     //TODO: How much does this being calculated slow the math down
     //hard code at init and have setters that update each other?
     private var polarValue:(direction:Basic, magnitude:Basic) {
-        let direction = angleFromNormalized //TODO: probably don't need to normalize?
+        let direction = angleInRadians//angleFromNormalized //TODO: probably don't need to normalize?
         let magnitude = length
         return (direction, magnitude)
     }
@@ -58,7 +62,7 @@ public struct PSVector {
 
 //MARK: Initializers
 extension PSVector {
-    init(_ x:Double, _ y:Double) {
+    init(_ x: any BinaryFloatingPoint, _ y:any BinaryFloatingPoint) {
         self.vectorTriplet = Triplet(x:Basic(x), y:Basic(y), z:1)
     }
     
@@ -67,15 +71,16 @@ extension PSVector {
     }
     
     //TODO: WHY IS THIS BACKWARDS??? flips the coordinates when done correctly?
-    static func fromPolar(direction:Basic, magnitude:Basic) -> Triplet {
+    static func fromPolar(direction:Basic, magnitude:Basic, preserveSign:Bool = false) -> Triplet {
             let x = cos(direction) * magnitude
             let y = sin(direction) * magnitude
-        return Triplet(x:x, y:y, z:1)
+            return Triplet(x:x, y:y, z:1)
     }
     
     static func toPolar(x:Basic, y:Basic) -> (direction:Basic, magnitude:Basic) {
-         let normalized = (simd_normalize(Pair(x,y)))
-         let direction = atan2(normalized.y, normalized.x)
+         //let normalized = (simd_normalize(Pair(x,y))) // TODO: possible danger here. Normalizing destroys direction inforamtion???
+         //let direction = atan2(normalized.y, normalized.x)
+         let direction = atan2(y, x)
          let magnitude = simd_length(Pair(x,y))
          return (direction:direction, magnitude:magnitude)
     }
@@ -135,20 +140,20 @@ extension PSVector {
     }
     
     //MARK: Angles
-    var normalized:Pair {
-        simd_normalize(vectorPair)
-    }
-    
-    var angleFromNormalized:Basic {
-        atan2(normalized.y, normalized.x)
-    }
+//    var normalized:Pair {
+//        simd_normalize(vectorPair)
+//    }
+//    
+//    var angleFromNormalized:Basic {
+//        atan2(normalized.y, normalized.x)
+//    }
     
     var angleInRadians:Basic {
         atan2(vectorTriplet.y, vectorTriplet.x)
     }
     
     public var radians:Double {
-        Double(angleFromNormalized)
+        Double(angleInRadians)
     }
     
     public var asAngle:Angle {
@@ -355,6 +360,10 @@ extension PSVector {
         return PSVector(direction: random, magnitude: 1)
     }
     
+    static let commonAngles:[Basic] = [0.0, π/4, π/2, π, π * 1.25, π * 1.5, tau, π/6, π/3, 2.3*π, -2.3*π]
     
+    static let doubleAngles:[Double] = [0.0, Double.pi/4, Double.pi/2, Double.pi, Double.pi * 1.25, Double.pi * 1.5, Double.pi*2, Double.pi/6, Double.pi/3]
+    
+    static let degreeAngles:[Double] = [0.0, 45, 90, 180, 225, 270, 360, 30, 60]
 
 }

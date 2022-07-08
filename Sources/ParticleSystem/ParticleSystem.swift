@@ -1,5 +1,4 @@
 public struct ParticleSystem {
-    public typealias Pair = SIMD2<Double>
     
     public private(set) var text = "Hello, World!"
     

@@ -191,7 +191,7 @@ public extension ParticleSystem {
             //let rotation = sin(interval)
             //let angle = particle.startRotation.rotated(radians: rotation).asAngle
             
-            let startVelocityRadians = particle.startSpinVelocity.radians
+            let startVelocityRadians = particle.startSpinVelocity
             let deltaTheta = startVelocityRadians * interval
             let angle = particle.startRotation.rotatedBy(radians: deltaTheta).asAngle
             
@@ -204,7 +204,7 @@ public extension ParticleSystem {
                 startPosistion: PSVector(x,y),
                 startVelocity: PSVector(direction: direction, magnitude: magnitude),
                 startRotation: PSVector.randomNormalized,
-                startSpinVelocity: PSVector.randomNormalized(in: spinVelocityRange),
+                startSpinVelocity: Double.random(in: spinVelocityRange),
                 mass: Double.random(in: massRange),
                 radius: Double.random(in: radiusRange)
             )

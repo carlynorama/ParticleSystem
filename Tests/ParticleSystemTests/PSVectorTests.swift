@@ -8,16 +8,29 @@
 import XCTest
 @testable import ParticleSystem
 
-final class PSVectorTests: XCTestCase {
+//TODO: distance functions
+//TODO: Math functions
+//TODO: Transformations
+
+
+
+class PSVectorTests: XCTestCase {
     typealias V = PSVector
     //static let π = Double.pi
     
-    func goodEnoughEqual(_ a: PSVector.Basic, _ b: PSVector.Basic) -> Bool {
-        return abs(a - b) < 0.000001  //Double.ulpOfOne is too precise
-   }
-    func goodEnoughEqual(d1: Double, d2: Double) -> Bool {
-        return abs(d1 - d2) < 0.00001  //Double.ulpOfOne is too precise
-   }
+//    func goodEnoughEqual(_ a: PSVector.Basic, _ b: PSVector.Basic) -> Bool {
+//        return abs(a - b) < 0.000001  //Double.ulpOfOne is too precise
+//   }
+//    func goodEnoughEqual(d1: Double, d2: Double) -> Bool {
+//        return abs(d1 - d2) < 0.00001  //Double.ulpOfOne is too precise
+//   }
+    
+    //gee goodEnoughEqual
+    public func close(_ a: any BinaryFloatingPoint, _ b: any BinaryFloatingPoint) -> Bool {
+        let l = Double(a)
+        let r = Double(b)
+        return abs(l - r) < 0.00001
+    }
     
     //MARK: Generating Test Data
     static let angleTestVectorSet = generateAngleTestVectors()
@@ -56,7 +69,7 @@ final class PSVectorTests: XCTestCase {
     func testComponentInVsDirectionDegrees() {
         for testPair in Self.componentTestVectorSet {
             var testPassed = false
-            testPassed = goodEnoughEqual(d1:testPair.input.theta, d2:testPair.vector.asAngle.degrees)
+            testPassed = close(testPair.input.theta, testPair.vector.asAngle.degrees)
             
             XCTAssertTrue((testPassed), "\(testPair.input.theta) is not the same as \(testPair.vector.asAngle.degrees) for pair (\(testPair.input.adjacent), \(testPair.input.adjacent))")
         }
@@ -70,20 +83,52 @@ final class PSVectorTests: XCTestCase {
             if testPair.angle.magnitude <= V.tau {
                 if testPair.angle == testPair.vector.angleInRadians {
                     testPassed = true
-                } else if goodEnoughEqual((testPair.angle.magnitude + testPair.vector.angleInRadians.magnitude), V.tau) {
+                } else if close((testPair.angle.magnitude + testPair.vector.angleInRadians.magnitude), V.tau) {
                     testPassed = true
                 }
             } else {
                 let reducedAngle = testPair.angle.truncatingRemainder(dividingBy: V.tau)
                 print("reduced angled for \(testPair.angle) is \(reducedAngle)")
-                if goodEnoughEqual(reducedAngle, testPair.vector.angleInRadians) {
+                if close(reducedAngle, testPair.vector.angleInRadians) {
                     testPassed = true
-                } else if goodEnoughEqual((reducedAngle.magnitude + testPair.vector.angleInRadians.magnitude), V.tau) {
+                } else if close((reducedAngle.magnitude + testPair.vector.angleInRadians.magnitude), V.tau) {
                     testPassed = true
                 }
             }
 
             XCTAssertTrue((testPassed), "\(testPair.angle) is not coterminal to \(testPair.vector.angleInRadians)")
+        }
+    }
+    
+    //MARK: Testing polarValues agains toPolar
+    
+    
+    func testToPolar() {
+        var testPassed = false
+        let result = V.toPolar(x: 4.0, y: 3.0)
+        let expectedTheta = atan2(3.0, 4.0)
+        let expectedH = 5.0
+        if close(result.magnitude, expectedH) && close(result.direction, expectedTheta) {
+            testPassed = true
+        }
+        XCTAssertTrue((testPassed), "V.toPolar broke the 3, 4, 5 triangle with mag\(result.magnitude), dir\(result.direction)")
+    }
+    
+    
+    func testPolarCoordVsFromPolar() {
+        for testPair in Self.componentTestVectorSet {
+            var testPassed = false
+            let polar1 = testPair.vector.polarComponets
+            let polar2 = V.toPolar(x: testPair.input.adjacent, y: testPair.input.opposite)
+            
+            XCTAssertTrue(testPair.vector.x == Double(testPair.input.adjacent), "components dont match for X \(testPair.vector.x) =/= (testPair.input.adjacent)")
+            XCTAssertTrue(testPair.vector.y == Double(testPair.input.opposite), "components dont match for Y \(testPair.vector.y) =/= (testPair.input.adjacent)")
+            
+            if close(polar1.direction, polar2.direction) && close(polar1.magnitude, polar2.magnitude) {
+                testPassed = true
+            }
+            
+            XCTAssertTrue((testPassed), "[\(testPair.input.adjacent), \(testPair.input.opposite)] vector.polarValues \(polar1) is not similar enough to PSVector.toPolar() \(polar2) from \(testPair.vector.vectorPair)")
         }
     }
 

@@ -42,11 +42,11 @@ public struct PSVector {
     //indicates that the vector represents a position in space."
     //
     //Is a var to have animatable data conformance. TBD is really necessary.
-    private var vectorTriplet:Triplet  //(x: 3, y: 2, z: 1)
+    private(set) var vectorTriplet:Triplet  //(x: 3, y: 2, z: 1)
     
     //TODO: How much does this being calculated slow the math down
     //hard code at init and have setters that update each other?
-    private var vectorPair:Pair {
+    var vectorPair:Pair {
         Pair(vectorTriplet.x, vectorTriplet.y)
     }
     

@@ -169,11 +169,9 @@ public extension ParticleSystem {
             let distanceToTravel = particle.startVelocity * interval
             let position = particle.startPosistion + distanceToTravel
             
-            //            let dx = particle.startVelocity.x * interval
-            //            let dy = particle.startVelocity.y * interval
-            //            let position = (x: particle.startPosistion.x + dx, y: particle.startPosistion.y + dy)
             
-            //TODO: Rewrite using simd? Don't like that his is done in here at all actually
+            //TODO: Rewrite bounds check using simd?
+            //TODO: Move to an async batch process?
             //At somepoint there should be a particle store cleaner? Asyc on an actor style?
             if visiblebounds.contains(position.x) && visiblebounds.contains(position.y) {
                 //if bounds.contains(CGPoint(x: x, y: y)) {

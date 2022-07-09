@@ -6,14 +6,8 @@
 ////
 //
 import Foundation
-//import Algorithms //for sample data
-import SwiftUI //For Vector Arithmatic Complaince if I want it in the future
-
-//Note to self simd IS part of accelrate.
+import SwiftUI //For Vector Arithmatic Complaince, not yet used
 import simd
-
-//wanted so can be wonton in terms of input types of public functions, but not yet done.
-//import Numerics
 
 
 ////https://developer.apple.com/documentation/accelerate/working_with_vectors
@@ -21,7 +15,6 @@ import simd
 
 
 public struct PSVector {
-    //typealias ValidInputType = Real
     public typealias Basic = Float
     public typealias Triplet = SIMD3<Basic>
     public typealias Pair = SIMD2<Basic>
@@ -50,10 +43,9 @@ public struct PSVector {
         Pair(vectorTriplet.x, vectorTriplet.y)
     }
     
-    //TODO: How much does this being calculated slow the math down
-    //hard code at init and have setters that update each other?
+
     private var polarValue:(direction:Basic, magnitude:Basic) {
-        let direction = angleInRadians//angleFromNormalized //TODO: probably don't need to normalize?
+        let direction = angleInRadians
         let magnitude = length
         return (direction, magnitude)
     }
@@ -180,7 +172,7 @@ extension PSVector {
     //1 0 tx
     //0 1 ty
     //0 0 1
-    func makeTranslationMatrix(tx:Basic, ty:Basic) -> Matrix3x3 {
+    private func makeTranslationMatrix(tx:Basic, ty:Basic) -> Matrix3x3 {
         //identity matrices (matrices with ones along the diagonal, and zeros elsewhere)
         var matrix = Self.identityMatrix3x3
         
@@ -190,30 +182,27 @@ extension PSVector {
         return matrix
     }
     
-    func translated(dx tx:Basic, dy ty:Basic) -> Triplet {
+    private func translated(dx tx:Basic, dy ty:Basic) -> Triplet {
         let translationMatrix = makeTranslationMatrix(tx: tx, ty: ty)
         return translationMatrix * vectorTriplet
     }
     
-    func translatedXY(dx tx:Basic, dy ty:Basic) -> (x:Basic, y:Basic) {
+    private func translatedXY(dx tx:Basic, dy ty:Basic) -> (x:Basic, y:Basic) {
         let translated = translated(dx: tx, dy: ty)
         return (x:translated.x, y:translated.y)
     }
     
-    public func movedBy(dx:Double, dy:Double) -> (x:Double, y:Double){
-        let moved = translatedXY(dx: Basic(dx), dy: Basic(dy))
-        return (Double(moved.x), Double(moved.y))
-        
-    }
-    
-    
-    //TODO: Wouldn't it be great if I could do this? Initializer for Type Alias??
-//    public func translatedXY(dx tx:any ValidInputType, dy ty:any ValidInputType) -> (x:Basic, y:Basic) {
-//        //TODO: Throws if casting fails
-//        let castTX = Basic(tx)
-//        let castTY = Basic(ty)
-//        return translatedXY(dx: castTX, dy: castTY)
+//    public func movedBy(dx:Double, dy:Double) -> (x:Double, y:Double){
+//        let moved = translatedXY(dx: Basic(dx), dy: Basic(dy))
+//        return (Double(moved.x), Double(moved.y))
+//
 //    }
+//
+    public func movedBy(dx tx:any BinaryFloatingPoint, dy ty:any BinaryFloatingPoint) -> (x:Double, y:Double) {
+        //TODO: Throws if casting fails?
+        let moved = translatedXY(dx: Basic(tx), dy: Basic(ty))
+        return (Double(moved.x), Double(moved.y))
+    }
     
     //MARK: Rotation
     

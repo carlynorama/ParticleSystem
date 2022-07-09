@@ -10,8 +10,8 @@ import SwiftUI //For Vector Arithmatic Complaince, not yet used
 import simd
 
 
-////https://developer.apple.com/documentation/accelerate/working_with_vectors
-///https://developer.apple.com/documentation/accelerate/working_with_matrices
+//https://developer.apple.com/documentation/accelerate/working_with_vectors
+//https://developer.apple.com/documentation/accelerate/working_with_matrices
 
 
 public struct PSVector {

@@ -9,162 +9,169 @@ import Foundation
 import SwiftUI
 
 
-
-public extension ParticleSystem {
-    struct Profile:Codable {
-        
-        //Spawning
-        public var timeBetweenSpawnsInSeconds:Double
-        
-        //how much chaos
-        public var coreAngle:Double
-        public var angleWobble:Double
-
-        public var coreMagnitude:Double
-        public var magnitudeWobble:Double
-        
-        public var coreSpinVelocity:Double
-        public var spinWobble:Double
-        
-        public var coreMassValue:Double
-        public var coreRadiusValue:Double
-        
-    }
-}
-public extension ParticleSystem.Profile {
-    init(coreAngle:Double = 0.0,
-         coreMagnitude:Double = 0.15,
-         spawnLag:Double = 1.0,
-         angleWobble:Double = Double.pi,
-         magnitudeWobble:Double = 0.05,
-         coreSpinVelocity:Double = 0.5,
-         spinWobble:Double = 0.5) {
-        self.coreAngle = coreAngle
-        self.coreMagnitude = coreMagnitude
-        self.timeBetweenSpawnsInSeconds = spawnLag
-        self.angleWobble = angleWobble
-        self.magnitudeWobble = magnitudeWobble
-        self.coreSpinVelocity = coreSpinVelocity
-        self.spinWobble = spinWobble
-        self.coreMassValue = 0.5
-        self.coreRadiusValue = 0.5
-    }
-}
-
-fileprivate extension ParticleSystem.Profile {
+fileprivate extension ParticleSystem.PSProfile {
+    ///Initializer for use by a ParticleManager to make sure no values are empty upon it's own initialization.
     init() {
-    coreAngle = 0.0
-    coreMagnitude = 0.15
-    timeBetweenSpawnsInSeconds = 1.0
-    timeBetweenSpawnsInSeconds = 1.0
-    angleWobble = Double.pi
-    magnitudeWobble = 0.05
-    coreSpinVelocity = 0.5
-    spinWobble = 0.5
+        coreAngle = 0.0
+        coreMagnitude = 0.15
+        timeBetweenSpawnsInSeconds = 1.0
+        angleWobble = Double.pi
+        magnitudeWobble = 0.05
+        coreSpinVelocity = 0.5
+        spinWobble = 0.5
         coreMassValue = 0.5
         coreRadiusValue = 0.5
     }
 }
 
 public extension ParticleSystem {
-    
+    ///The heart of a ParticleSystem.
+    ///
+    ///The ParticleManager stores the particles in a Set.  It handles each particles creation and deletion. It additionally retrieves location, rotation and other information about each particle.
+    //TODO: Actor?
     final class ParticleManager {
-        //Particle Storage
-        public private(set) var particles = Set<Particle>()
-        public var profile = Profile()
         
-        //System Features
+        
+        public init() {}
+        //MARK: Particle Storage
+        
+        ///The set of particles.
+        public private(set) var particles = Set<Particle>()
+        ///The profile settings. All runtime updatable features live in the the profile.
+        
+        
+        //MARK: System Features
+        //TODO: Should this be a private set? What about prototyping mode?
+        public var profile = PSProfile()
+        
+        ///The maximum number of particles that can be managed by this particle system.
+        //TODO: Make this part of an init.
         private let maxCount = 1000
+        
+        ///The birthrate in seconds rather than the time between spawns.
+        public var birthRate:Double {
+            1/(profile.timeBetweenSpawnsInSeconds)
+        }
+        
         //TODO: This should be determined by what/who exactly?
+        //TODO: Make this part of an init.
+        ///The boundaries after which a particle will be removed from particle cloud.
         private let visiblebounds = -2.0...2.0
         
-        //Sub-Timing
-        
-        
-        
-        //Particle Representation
+        //MARK: Particle Representation
+        //TODO: What it looks like shouldn't live here.
+        ///convience appearance for a default particle.
         public let particleRepresentation = Image(systemName: "sparkle")
         
-        //Spawning
-        //This is saved as (Double, Double) rather than PSVector
-        //because it is updated externally and only internally used
-        //to create particles.
-        public private(set) var origin = (x:0.0, y:0.0)
+        //MARK: Spawning
         
-        //Emission Ranges -- Updateable
-        public var angleRange:ClosedRange<Double> {
+        ///The location of a particles emmission relative to other particles in the system.
+        ///In most applications this value will have a root of 0,0 and a range of -0.5 to 0.5 where the smallest dimension of the parent view is definitionally 1.
+        ///The values are saved as (Double, Double) rather than PSVector because it is updated externally and only internally used during particle creation.
+        ///Currently all ParticleSystems have only this point source.
+        ///- Parameter x: the x coordinate
+        ///- Parameter y: the y coordinate
+        public private(set) var origin = (x:0.0, y:0.0)
+        //TODO: emitters that aren't point sources??
+        
+        //Emission Ranges
+        
+        ///range of headings for new particles.
+        private var angleRange:ClosedRange<Double> {
             (profile.coreAngle - profile.angleWobble)...(profile.coreAngle + profile.angleWobble)
         }
-  
-        public var magnitudeRange:ClosedRange<Double> {
+        
+        ///range of speeds for new particles.
+        private var magnitudeRange:ClosedRange<Double> {
             max((profile.coreMagnitude - profile.magnitudeWobble), 0.01)...(profile.coreMagnitude + profile.magnitudeWobble) //always a little
         }
-        
-        public var spinVelocityRange:ClosedRange<Double> {
+        ///range of rotational speed for new particles.
+        private var spinVelocityRange:ClosedRange<Double> {
             max((profile.coreSpinVelocity - profile.spinWobble), 0.01)...(profile.coreSpinVelocity + profile.spinWobble) //always a little
         }
         
-        public var massRange:ClosedRange<Double> {
+        ///range of masses for new particles.
+        private var massRange:ClosedRange<Double> {
             0.01...1.0
         }
         
-        public var radiusRange:ClosedRange<Double> {
+        ///range of radii for new particles.
+        private var radiusRange:ClosedRange<Double> {
             0.01...1.0
         }
         
-        public init() {}
-        
-        private var updateTime = Date.timeIntervalSinceReferenceDate
         
         
-        //TODO: Particle add should stay here, but values should be udated by a data subscription?
+        //MARK: Public Updating
+        
+        ///Function to both update the starting condtions and spawn
+        ///
+        ///The update function updates the direction and magnitude of new particles, as well their origin point. Other types of profile information are not handled in the update. If it's time and there aren't already too many particles it will also spawn a new particle.
+        ///- Parameter date: the timestamp from the calling funtion.
+        ///- Parameter direction: new coreDirection
+        ///- Parameter magnitude: new coreMagnitude
+        ///- Parameter origin: new emitter location
         public func update(date:Date, direction:Double, magnitude:Double, origin:(Double, Double)) {
             
             updateOrigin(origin)
             updateStartingVelocity(direction: direction, magnitude: magnitude)
             
-            if particles.count < maxCount && checkTimer(currentTime: date.timeIntervalSinceReferenceDate) {
+            if particles.count < maxCount && isTimeToSpawn(currentTime: date.timeIntervalSinceReferenceDate) {
                 addParticle()
             }
         }
         
-        public func updateStartingVelocity(direction:Double, magnitude:Double) {
-            profile.coreAngle = direction
-            profile.coreMagnitude = magnitude
-        }
-        
-        public var birthRatePerSecond:Double {
-            1/(profile.timeBetweenSpawnsInSeconds)
-        }
-        
-        public func updateOrigin(_ newCoords:(Double, Double)){
-            self.origin = newCoords
-            //print("origin - \(self.origin.x), \(self.origin.y)")
-        }
-        
-        public func updateOrigin(_ x:Double, _ y:Double) {
-            self.origin = (x,y)
-            //print("origin - \(self.origin.x), \(self.origin.y)")
-        }
-        
         //TODO: Replace with clock???
-        private func checkTimer(currentTime:Double) -> Bool {
-            if currentTime > updateTime {
-                updateTime = currentTime + profile.timeBetweenSpawnsInSeconds
+        ///Deadline to spawn the next particle
+        private var nextTimeToSpawn = Date.timeIntervalSinceReferenceDate
+        
+        ///Check to see if it's time to spawn.
+        ///
+        ///Uses a passed time, typically in from a ViewModel or a TimelineView, to check against the deadline, ``nextTimeToSpawn``.
+        ///- Parameter currentTime: the time it is according to the caller.
+        private func isTimeToSpawn(currentTime:Double) -> Bool {
+            if currentTime > nextTimeToSpawn {
+                nextTimeToSpawn = currentTime + profile.timeBetweenSpawnsInSeconds
                 return true
             } else {
                 return false
             }
         }
         
-        func addParticle() {
+        ///passes a direction and magnitude to coreAngle and coreMagnitude
+        private func updateStartingVelocity(direction:Double, magnitude:Double) {
+            profile.coreAngle = direction
+            profile.coreMagnitude = magnitude
+        }
+        ///updates coreAngle and coreMagnitude using a PSVector.
+        private func updateStartingVelocity(_ vector:PSVector) {
+            profile.coreAngle = vector.polarComponets.direction
+            profile.coreMagnitude = vector.polarComponets.magnitude
+        }
+        
+        ///passes a tuple of Doubles to origin. (x,y)
+        private func updateOrigin(_ newCoords:(Double, Double)){
+            self.origin = newCoords
+        }
+        
+        ///passes an x and a y to the origin.
+        private func updateOrigin(_ x:Double, _ y:Double) {
+            self.origin = (x,y)
+        }
+        
+        ///Add a particle to the set. Should only be called by an update function.
+        private func addParticle() {
             particles.insert(createParticle())
         }
         
-        func remove(_ particle:Particle) {
+        ///Remove a particle to the set. Should only be called by an update function.
+        private func remove(_ particle:Particle) {
             particles.remove(particle)
         }
         
+        //MARK: Particle Behaviors
+        
+        ///Retrieves a particle location for a given time as a TimeInterval.
         public func particleLocation(for particle:Particle, when timeInterval:Double) -> (x:Double, y:Double)? {
             let interval = timeInterval - particle.creationDate
             
@@ -184,9 +191,10 @@ public extension ParticleSystem {
             }
         }
         
+        ///Retrieves a particle rotation for a given time as a TimeInterval.
         public func particleRotation(for particle:Particle, when timeInterval:Double) -> Angle {
             let interval = timeInterval - particle.creationDate
-
+            
             let startVelocityRadians = particle.startSpinVelocity
             let deltaTheta = startVelocityRadians * interval
             let angle = particle.startRotation.rotatedBy(radians: deltaTheta).asAngle
@@ -195,6 +203,9 @@ public extension ParticleSystem {
             
         }
         
+        //MARK: Particle Creation
+        
+        ///Create a particle based on a location and velocity vector, using the profile settings for everything else.
         func createParticle(x:Double, y:Double, direction:Double, magnitude:Double) -> Particle {
             Particle (
                 startPosistion: PSVector(x,y),
@@ -206,7 +217,7 @@ public extension ParticleSystem {
             )
         }
         
-        //can't use variable as a default
+        ///Create a random particle based on profile settings.
         func createParticle() -> Particle {
             let direction = Double.random(in: angleRange)
             let maginitude = Double.random(in: magnitudeRange)

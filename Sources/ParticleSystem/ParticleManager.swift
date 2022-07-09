@@ -86,7 +86,9 @@ public extension ParticleSystem {
         public let particleRepresentation = Image(systemName: "sparkle")
         
         //Spawning
-        //private var birthRate = 1.0
+        //This is saved as (Double, Double) rather than PSVector
+        //because it is updated externally and only internally used
+        //to create particles.
         public private(set) var origin = (x:0.0, y:0.0)
         
         //Emission Ranges -- Updateable
@@ -174,7 +176,6 @@ public extension ParticleSystem {
             //TODO: Move to an async batch process?
             //At somepoint there should be a particle store cleaner? Asyc on an actor style?
             if visiblebounds.contains(position.x) && visiblebounds.contains(position.y) {
-                //if bounds.contains(CGPoint(x: x, y: y)) {
                 return (x:position.x, y:position.y)
             } else {
                 remove(particle)
@@ -185,10 +186,7 @@ public extension ParticleSystem {
         
         public func particleRotation(for particle:Particle, when timeInterval:Double) -> Angle {
             let interval = timeInterval - particle.creationDate
-            //Shimmy
-            //let rotation = sin(interval)
-            //let angle = particle.startRotation.rotated(radians: rotation).asAngle
-            
+
             let startVelocityRadians = particle.startSpinVelocity
             let deltaTheta = startVelocityRadians * interval
             let angle = particle.startRotation.rotatedBy(radians: deltaTheta).asAngle
@@ -210,7 +208,7 @@ public extension ParticleSystem {
         
         //can't use variable as a default
         func createParticle() -> Particle {
-            let direction = Double.random(in: angleRange)//Angle(degrees: 30).radians//1.0 * Double.pi //
+            let direction = Double.random(in: angleRange)
             let maginitude = Double.random(in: magnitudeRange)
             return createParticle(x: origin.x, y: origin.y, direction: direction, magnitude: maginitude)
         }

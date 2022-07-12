@@ -6,8 +6,6 @@
 //  https://developer.apple.com/documentation/scenekit/scnparticlesystem
 
 import Foundation
-import SwiftUI
-
 
 fileprivate extension ParticleSystem.PSProfile {
     ///Initializer for use by a ParticleManager to make sure no values are empty upon it's own initialization.
@@ -57,11 +55,6 @@ public extension ParticleSystem {
         //TODO: Make this part of an init.
         ///The boundaries after which a particle will be removed from particle cloud.
         private let visiblebounds = -2.0...2.0
-        
-        //MARK: Particle Representation
-        //TODO: What it looks like shouldn't live here.
-        ///convience appearance for a default particle.
-        public let particleRepresentation = Image(systemName: "sparkle")
         
         //MARK: Spawning
         
@@ -192,12 +185,12 @@ public extension ParticleSystem {
         }
         
         ///Retrieves a particle rotation for a given time as a TimeInterval.
-        public func particleRotation(for particle:Particle, when timeInterval:Double) -> Angle {
+        public func particleRotation(for particle:Particle, when timeInterval:Double) -> Double {
             let interval = timeInterval - particle.creationDate
             
             let startVelocityRadians = particle.startSpinVelocity
             let deltaTheta = startVelocityRadians * interval
-            let angle = particle.startRotation.rotatedBy(radians: deltaTheta).asAngle
+            let angle = particle.startRotation.rotatedBy(radians: deltaTheta).radians
             
             return angle
             

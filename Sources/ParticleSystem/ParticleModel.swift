@@ -34,7 +34,7 @@ public extension ParticleSystem {
         ///A number from 0 to 1 that represents a new particles relative mass to a particle system norm.
         let mass: Double
         ///A number from 0 to 1 that represents a new particles relative radius to a particle system norm.
-        let radius: Double
+        public let radius: Double
         
         //TODO: Center of gravity for spin, can also for angular?
         //public let rotationPoint = PSVector(0.0,0.0)

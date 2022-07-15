@@ -51,6 +51,14 @@ public extension ParticleSystem {
             1/(profile.timeBetweenSpawnsInSeconds)
         }
         
+        public var fromDirection:Double {
+            profile.coreAngle
+        }
+        
+        public var toDirection:Double {
+            profile.coreAngle + Double.pi
+        }
+        
         //TODO: This should be determined by what/who exactly?
         //TODO: Make this part of an init.
         ///The boundaries after which a particle will be removed from particle cloud.

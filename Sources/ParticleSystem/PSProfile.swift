@@ -22,7 +22,7 @@ public extension ParticleSystem {
         
         //how much chaos
         
-        ///The direction componet of a new particle's velocity
+        ///The direction componet of a new particle's velocity is equivalent to a FROM direction
         public var coreAngle:Double
         ///The amount of play in the direction a new particle will go
         public var angleWobble:Double

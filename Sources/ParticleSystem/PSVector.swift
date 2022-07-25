@@ -2,7 +2,7 @@
 ////  Vector.swift
 ////  Wind
 ////
-////  Created by Labtanza on 6/22/22.
+////  Created by Carlyn Maw on 6/22/22.
 ////
 //
 import Foundation

@@ -2,8 +2,10 @@
 //  ParticleSystem.swift
 //  Wind
 //
-//  Created by Labtanza on 6/19/22.
+//  Created by Carlyn Maw on 6/19/22.
 //  https://developer.apple.com/documentation/scenekit/scnparticlesystem
+
+//TODO: URGENT WHAT HAPPENS WHEN MAGNITUDE IS ZERO???
 
 import Foundation
 

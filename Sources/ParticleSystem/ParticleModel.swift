@@ -1,6 +1,5 @@
 //
-//  ParticleModelExample.swift
-//  Wind
+//  ParticleMode.swift
 //
 //  Created by Carlyn Maw on 6/19/22.
 //

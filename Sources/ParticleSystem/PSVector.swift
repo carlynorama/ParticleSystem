@@ -1,9 +1,8 @@
-////
-////  Vector.swift
-////  Wind
-////
-////  Created by Carlyn Maw on 6/22/22.
-////
+//
+//  Vector.swift
+//
+//  Created by Carlyn Maw on 6/22/22.
+//
 //
 import Foundation
 import SwiftUI //For Vector Arithmatic Complaince, not yet used

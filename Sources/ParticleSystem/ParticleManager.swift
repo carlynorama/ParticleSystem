@@ -1,6 +1,5 @@
 //
-//  ParticleSystem.swift
-//  Wind
+//  ParticleManager.swift
 //
 //  Created by Carlyn Maw on 6/19/22.
 //  https://developer.apple.com/documentation/scenekit/scnparticlesystem

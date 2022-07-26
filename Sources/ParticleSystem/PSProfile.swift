@@ -55,7 +55,8 @@ public extension ParticleSystem.PSProfile {
          angleWobble:Double = Double.pi,
          magnitudeWobble:Double = 0.05,
          coreSpinVelocity:Double = 0.5,
-         spinWobble:Double = 0.5) {
+         spinWobble:Double = 0.5
+    ) {
         self.coreAngle = coreAngle
         self.coreMagnitude = coreMagnitude
         self.timeBetweenSpawnsInSeconds = spawnLag

@@ -99,7 +99,7 @@ public extension ParticleSystem {
         
         ///range of radii for new particles.
         private var radiusRange:ClosedRange<Double> {
-            0.01...1.0
+            0.75...1.0
         }
         
         
@@ -121,6 +121,20 @@ public extension ParticleSystem {
             if particles.count < maxCount && isTimeToSpawn(currentTime: date.timeIntervalSinceReferenceDate) {
                 addParticle()
             }
+        }
+        
+        ///Clear particle system of current particles and spawn delay.
+        ///
+        ///Leaves particle profile intact.
+        public func clear() {
+            particles.removeAll()
+            nextTimeToSpawn = Date.timeIntervalSinceReferenceDate
+        }
+        
+        public func clear(particle:Particle) {
+            particles.remove(particle)
+            print("removed particle: it was \(particle.age) old")
+            //nextTimeToSpawn = Date.timeIntervalSinceReferenceDate
         }
         
         //TODO: Replace with clock???

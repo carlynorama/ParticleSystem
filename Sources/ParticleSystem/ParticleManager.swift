@@ -140,7 +140,7 @@ public extension ParticleSystem {
         
         public func clear(particle:Particle) {
             particles.remove(particle)
-            print("removed particle: it was \(particle.age) old")
+            //print("PManager, clear(): removed particle at \(particle.age) seconds old")
             //nextTimeToSpawn = Date.timeIntervalSinceReferenceDate
         }
         
@@ -154,6 +154,7 @@ public extension ParticleSystem {
         ///- Parameter currentTime: the time it is according to the caller.
         private func isTimeToSpawn(currentTime:Double) -> Bool {
             if currentTime > nextTimeToSpawn {
+                //print("PManager, isTimeToSpawn:\(profile.timeBetweenSpawnsInSeconds)")
                 nextTimeToSpawn = currentTime + profile.timeBetweenSpawnsInSeconds
                 return true
             } else {

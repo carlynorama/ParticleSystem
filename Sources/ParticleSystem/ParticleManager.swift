@@ -78,6 +78,13 @@ public extension ParticleSystem {
         
         //Emission Ranges
         
+        private func noNegativeRange(_ value:Double, percent:Double) -> ClosedRange<Double> {
+            let factor = value * percent
+            let lowerBound = max((value - factor), 0.0)
+            let upperBound = value + factor
+            return lowerBound...upperBound
+        }
+        
         ///range of headings for new particles.
         private var angleRange:ClosedRange<Double> {
             (profile.coreAngle - profile.angleWobble)...(profile.coreAngle + profile.angleWobble)
@@ -85,11 +92,11 @@ public extension ParticleSystem {
         
         ///range of speeds for new particles.
         private var magnitudeRange:ClosedRange<Double> {
-            max((profile.coreMagnitude - profile.magnitudeWobble), 0.01)...(profile.coreMagnitude + profile.magnitudeWobble) //always a little
+            noNegativeRange(profile.coreMagnitude, percent: profile.magnitudeWobble)
         }
         ///range of rotational speed for new particles.
         private var spinVelocityRange:ClosedRange<Double> {
-            max((profile.coreSpinVelocity - profile.spinWobble), 0.01)...(profile.coreSpinVelocity + profile.spinWobble) //always a little
+            noNegativeRange(profile.coreSpinVelocity, percent: profile.spinWobble)
         }
         
         ///range of masses for new particles.

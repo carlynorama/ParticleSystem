@@ -30,12 +30,12 @@ public extension ParticleSystem {
         ///The magnitude component of a new particle's velocity.
         ///Where a value of 1 represents the size of the parent views smaller dimension.
         public var coreMagnitude:Double
-        ///The amount of play in how fast a new particle will go. Same unit as coreMagnitude.
+        ///The amount of play in how fast a new particle will go. As a ± percent.
         public var magnitudeWobble:Double
         
         ///The amount, in radians, a new particle will spin per update
         public var coreSpinVelocity:Double
-        ///The amount of play in how fast a particle will spin. Same unit as coreVelocity.
+        ///The amount of play in how fast a particle will spin. As a ± percent.
         public var spinWobble:Double
         
         ///A number from 0 to 1 that represents a new particles relative mass to a particle system norm.

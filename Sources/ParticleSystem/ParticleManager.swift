@@ -19,9 +19,9 @@ fileprivate extension ParticleSystem.PSProfile {
         coreSpinVelocity = 0.5
         spinWobble = 0.5
         coreMassValue = 0.5
-        massWobble = 0.4
+        massWobble = 0.1
         coreRadiusValue = 0.5
-        radiusWobble = 0.4
+        radiusWobble = 0.1
     }
 }
 

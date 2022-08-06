@@ -71,6 +71,6 @@ public extension ParticleSystem.PSProfile {
         self.coreMassValue = 0.5
         self.massWobble = 0.4
         self.coreRadiusValue = 0.5
-        self.radiusWobble = 0.4
+        self.radiusWobble = 0.1
     }
 }

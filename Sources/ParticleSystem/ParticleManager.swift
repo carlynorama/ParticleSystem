@@ -19,7 +19,9 @@ fileprivate extension ParticleSystem.PSProfile {
         coreSpinVelocity = 0.5
         spinWobble = 0.5
         coreMassValue = 0.5
+        massWobble = 0.4
         coreRadiusValue = 0.5
+        radiusWobble = 0.4
     }
 }
 
@@ -76,12 +78,18 @@ public extension ParticleSystem {
         public private(set) var origin = (x:0.0, y:0.0)
         //TODO: emitters that aren't point sources??
         
-        //Emission Ranges
+        //MARK: Emission Ranges
         
         private func noNegativeRange(_ value:Double, percent:Double) -> ClosedRange<Double> {
             let factor = value * percent
             let lowerBound = max((value - factor), 0.0)
             let upperBound = value + factor
+            return lowerBound...upperBound
+        }
+        
+        private func noNegativeRange(_ value:Double, amount:Double) -> ClosedRange<Double> {
+            let lowerBound = max((value - amount), 0.0)
+            let upperBound = value + amount
             return lowerBound...upperBound
         }
         
@@ -101,12 +109,12 @@ public extension ParticleSystem {
         
         ///range of masses for new particles.
         private var massRange:ClosedRange<Double> {
-            0.01...1.0
+            noNegativeRange(profile.coreMassValue, amount: profile.massWobble)
         }
         
         ///range of radii for new particles.
         private var radiusRange:ClosedRange<Double> {
-            0.75...1.0
+            noNegativeRange(profile.coreRadiusValue, amount: profile.radiusWobble)
         }
         
         

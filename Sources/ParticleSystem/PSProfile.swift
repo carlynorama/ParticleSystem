@@ -30,7 +30,7 @@ public extension ParticleSystem {
         ///The magnitude component of a new particle's velocity.
         ///Where a value of 1 represents the size of the parent views smaller dimension.
         public var coreMagnitude:Double
-        ///The amount of play in how fast a new particle will go. As a ± percent.
+        ///The amount of play in how fast a new particle will go. As a ± percentage.
         public var magnitudeWobble:Double
         
         ///The amount, in radians, a new particle will spin per update
@@ -40,9 +40,13 @@ public extension ParticleSystem {
         
         ///A number from 0 to 1 that represents a new particles relative mass to a particle system norm.
         public var coreMassValue:Double
+        ///The amount of play in how much mass the particle will have. As a point change on the the scaler
+        public var massWobble:Double
         
         ///A number from 0 to 1 that represents a new particles relative radius to a particle system norm.
         public var coreRadiusValue:Double
+        ///The amount of play in the raduis of the particle. As a point change on the the scaler
+        public var radiusWobble:Double
         
     }
 }
@@ -65,6 +69,8 @@ public extension ParticleSystem.PSProfile {
         self.coreSpinVelocity = coreSpinVelocity
         self.spinWobble = spinWobble
         self.coreMassValue = 0.5
+        self.massWobble = 0.4
         self.coreRadiusValue = 0.5
+        self.radiusWobble = 0.4
     }
 }

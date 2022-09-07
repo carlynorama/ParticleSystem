@@ -51,6 +51,10 @@ public extension ParticleSystem {
     }
 }
 
+extension ParticleSystem.PSProfile:Equatable {
+    
+}
+
 public extension ParticleSystem.PSProfile {
     ///initializer that allows inputing each value in the struct, but provides defaults.
     init(coreAngle:Double = 0.0,
